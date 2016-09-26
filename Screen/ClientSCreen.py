@@ -10,6 +10,9 @@ class ClientSCreen:
     def __init__(self,master):
         self.master=master
         self.clientList = {}
+        self.textL1 = StringVar()
+        self.textL2 = StringVar()
+        self.textL3 = StringVar()
         f = open('workfile.dat', 'r')
         for line in f:
             print(line)
@@ -20,8 +23,13 @@ class ClientSCreen:
                 aList.append(j)
             self.clientList[clientInfo[0]] = aList
         f.close()
-        for client in self.clientList:
-            print(">" + client)
+        #for client in self.clientList:
+        #    print(">" + client)
+
+        theFirstClient=str(list(self.clientList.keys())[0])
+        self.textL1.set(theFirstClient)
+        self.textL2.set(self.clientList[theFirstClient][1])
+        self.textL3.set(self.clientList[theFirstClient][2])
 
     def drawScreen (self) :
         listPhoto= []
@@ -58,9 +66,11 @@ class ClientSCreen:
 
 
 
-
+        titleLB = Label(self.master,name="titleLB",text="Liste des clients",anchor=S,padx=0,pady=0)
+        titleLB.grid(row=1,column=1)
         listbox = Listbox(self.master, name="maListe")
-        listbox.grid(row=1, column=1, rowspan=3, sticky=N + S)
+        listbox.bind("<Double-Button-1>", self.refreshClientDetails)
+        listbox.grid(row=2, column=1, rowspan=3, sticky=N + S)
         for client in self.clientList:
             print(">1 " + client)
             listbox.insert(END, client)
@@ -72,6 +82,15 @@ class ClientSCreen:
         listPhoto.append(nP)
         listPhoto.append(nP2)
         listPhoto.append(nP3)
+
+        #Client details
+        clientName = Label(self.master,name="clientName",textvariable=self.textL1, anchor=S, padx=0, pady=0)
+        clientName.grid(row=2,column=2, sticky=N + S)
+        clientAdress = Label(self.master,name="clientAdress",textvariable=self.textL2, anchor=S, padx=0, pady=0)
+        clientAdress.grid(row=3,column=2, sticky=N + S)
+        clientType =  Label(self.master,name="clientType",textvariable=self.textL3, anchor=S, padx=0, pady=0)
+        clientType.grid(row=4,column=2, sticky=N + S)
+
         return listPhoto
 
     def callbackAdd (self,event) :
@@ -151,6 +170,17 @@ class ClientSCreen:
         for client in clientList:
             print(")>" + client)
             theList.insert(END, client)
+
+    def refreshClientDetails(self,event):
+        try :
+            theList = self.master.nametowidget(".maListe")
+            self.textL1.set(theList.get(ACTIVE))
+            self.textL2.set(self.clientList[theList.get(ACTIVE)][1])
+            self.textL3.set(self.clientList[theList.get(ACTIVE)][2])
+
+        except Exception as e :
+            print ("error !!!!!")
+            print (e)
 
     def callbackGen(self,event):
             print("Click3" + str(event))
