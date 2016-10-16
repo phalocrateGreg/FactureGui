@@ -1,35 +1,38 @@
+import traceback
+
 from tkinter import *
-from tkinter import simpledialog
+import tkinter.messagebox as messagebox
+import tkinter.simpledialog as simpledialog
 
-from pylatex import Document, Section, Itemize, Enumerate, Description,  Command, NoEscape
-
-import os
-import sys
+from Command.FactureWritter import FactureWritter
+from Bom.Client import Client
 
 class ClientSCreen:
     def __init__(self,master):
         self.master=master
         self.clientList = {}
-        self.textL1 = StringVar()
-        self.textL2 = StringVar()
-        self.textL3 = StringVar()
+        self.textList = []
+        for ix in range (0,7) :
+            self.textList.append(StringVar())
+
         f = open('workfile.dat', 'r')
         for line in f:
             print(line)
             clientInfo = line.split(";")
-            aList = []
-            for j in clientInfo:
-                print(j)
-                aList.append(j)
-            self.clientList[clientInfo[0]] = aList
+            if(len(clientInfo)>5):
+                aClient=Client(clientInfo[0], clientInfo[1],clientInfo[6], clientInfo[4],clientInfo[2],clientInfo[3],clientInfo[5])
+                self.clientList[aClient.name] = aClient
         f.close()
-        #for client in self.clientList:
-        #    print(">" + client)
 
-        theFirstClient=str(list(self.clientList.keys())[0])
-        self.textL1.set(theFirstClient)
-        self.textL2.set(self.clientList[theFirstClient][1])
-        self.textL3.set(self.clientList[theFirstClient][2])
+        #Initialize the first item in the list as the details
+        try :
+            theFirstClient=str(list(self.clientList.keys())[0])
+            theInfo=self.clientList[theFirstClient].toList()
+            for ix in range (0,len(theInfo)-1):
+                self.textList[ix].set(theInfo[ix])
+        except Exception as e:
+            print ("Unbale to init the field")
+
 
     def drawScreen (self) :
         listPhoto= []
@@ -40,7 +43,6 @@ class ClientSCreen:
         w = Label(self.master, image=nP, text="Add client", compound="top")
         w.bind("<Button-1>", self.callbackAdd)
         w.photo = photo
-        # w.pack(fill=BOTH,expand="true")
         w.grid(row=rowIndex)
 
         rowIndex = rowIndex + 1
@@ -59,12 +61,6 @@ class ClientSCreen:
         w3.photo = photo2
         w3.grid(row=rowIndex, padx=20)
 
-        # test = MyDialog(root)
-
-        # for i in myContainer1.pack_slaves():
-        #    print (str(i))
-
-
 
         titleLB = Label(self.master,name="titleLB",text="Liste des clients",anchor=S,padx=0,pady=0)
         titleLB.grid(row=1,column=1)
@@ -75,7 +71,7 @@ class ClientSCreen:
             print(">1 " + client)
             listbox.insert(END, client)
 
-        #AVoid photo to be destroy by garbage collector
+        #Avoid photo to be destroy by garbage collector
         listPhoto.append(photo)
         listPhoto.append(photo2)
         listPhoto.append(photo3)
@@ -84,34 +80,46 @@ class ClientSCreen:
         listPhoto.append(nP3)
 
         #Client details
-        clientName = Label(self.master,name="clientName",textvariable=self.textL1, anchor=S, padx=0, pady=0)
-        clientName.grid(row=2,column=2, sticky=N + S)
-        clientAdress = Label(self.master,name="clientAdress",textvariable=self.textL2, anchor=S, padx=0, pady=0)
-        clientAdress.grid(row=3,column=2, sticky=N + S)
-        clientType =  Label(self.master,name="clientType",textvariable=self.textL3, anchor=S, padx=0, pady=0)
-        clientType.grid(row=4,column=2, sticky=N + S)
+        try :
+            theRow=2
+            clientName = Label(self.master,name="clientName",textvariable=self.textList[0], anchor=S, padx=0, pady=0).grid(row=theRow,column=2, sticky=N + S)
+            theRow=theRow+1
+            clientAdress = Label(self.master,name="clientAdress",textvariable=self.textList[1], anchor=S, padx=0, pady=0).grid(row=theRow,column=2, sticky=N + S)
 
+            theRow = theRow + 1
+            clientZip=Label(self.master,name="clientZip",textvariable=self.textList[3], anchor=S, padx=0, pady=0).grid(row=theRow,column=2, sticky=N + S)
+
+            theRow = theRow + 1
+            clientCity = Label(self.master, name="clientCity", textvariable=self.textList[2], anchor=S, padx=0,pady=0).grid(row=theRow, column=2, sticky=N + S)
+
+            theRow = theRow + 1
+            clientType =  Label(self.master,name="clientType",textvariable=self.textList[6], anchor=S, padx=0, pady=0).grid(row=theRow,column=2, sticky=N + S)
+
+            theRow = theRow + 1
+            clientMail = Label(self.master, name="clientMail", textvariable=self.textList[4], anchor=S, padx=0,
+                               pady=0).grid(row=theRow, column=2, sticky=N + S)
+        except Exception as e :
+            print ("Unable to draw CLient details")
+            print(e)
+            print(traceback.format_exc())
         return listPhoto
 
     def callbackAdd (self,event) :
         print ("Click"+str(event))
         test = MyDialog(event.widget)
-        #refreshClientList(event.widget.master)
-        print ("refresssssssssssssssssssssh")
-        clientList = {}
-        f = open('workfile.dat', 'r')
-        for line in f:
-            clientInfo = line.split(";")
-            aList = []
-            for j in clientInfo:
-                aList.append(j)
-            clientList[clientInfo[0]] = aList
-        f.close()
-        theList=event.widget.master.nametowidget(".maListe")
-        theList.delete(0, END)
-        for client in clientList:
-            print(")>" + client)
-            theList.insert(END, client)
+
+        if test.client is not None :
+            print (test.client.name)
+
+            print ("refresssssssssssssssssssssh")
+            self.clientList[test.client.name]=test.client
+            theList=event.widget.master.nametowidget(".maListe")
+            theList.delete(0, END)
+            for client in self.clientList:
+                print(")>" + client)
+                theList.insert(END, client)
+        else :
+            print ("Nothing return ... Do not refresh")
 
 
     def callbackRm (self,event) :
@@ -120,210 +128,102 @@ class ClientSCreen:
         print ("Item to rm=>"+theList.get(ACTIVE))
         print("Rmmmmmmmmmmmmmmmmmmm")
 
-        #First read the file
-        clientList = {}
-        f = open('workfile.dat', 'r')
-        for line in f:
-            clientInfo = line.split(";")
-            aList = []
-            for j in clientInfo:
-                aList.append(j)
-            clientList[clientInfo[0]] = aList
-        f.close()
 
         #Now remove the items
         f = open('workfile.dat', 'w')
         newClientList = {}
-        for client in clientList:
+        del self.clientList[theList.get(ACTIVE)]
+        for client in self.clientList:
             print ("# "+client+" "+theList.get(ACTIVE))
             if client != theList.get(ACTIVE):
-                f.write("\n" + client + ";" + clientList[client][0] + ";" + clientList[client][1])
-                aList = []
-                clientInfo=clientList[client]
-                for j in clientInfo:
-                    aList.append(j)
-                newClientList[clientInfo[0]] = aList
+                f.write( client + ";" + self.clientList[client].adress + ";" + self.clientList[client].period+"\n")
             else :
                 print ("Skip this item =>"+theList.get(ACTIVE))
+
         f.close()
 
 
         theList.delete(0, END)
-        for client in newClientList:
+        for client in self.clientList:
             print(")>" + client)
             theList.insert(END, client)
 
-
-    def refreshClientList(self) :
-        print ("refresssssssssssssssssssssh")
-        clientList = {}
-        f = open('workfile.dat', 'r')
-        for line in f:
-            clientInfo = line.split(";")
-            aList = []
-            for j in clientInfo:
-                aList.append(j)
-            clientList[clientInfo[0]] = aList
-        f.close()
-        theList=self.master.nametowidget(".maListe")
-        theList.delete(0, END)
-        for client in clientList:
-            print(")>" + client)
-            theList.insert(END, client)
 
     def refreshClientDetails(self,event):
         try :
             theList = self.master.nametowidget(".maListe")
-            self.textL1.set(theList.get(ACTIVE))
-            self.textL2.set(self.clientList[theList.get(ACTIVE)][1])
-            self.textL3.set(self.clientList[theList.get(ACTIVE)][2])
+            theListInfo=self.clientList[theList.get(ACTIVE)].toList()
+            index=0
+            for ix in theListInfo:
+                print (ix)
+                self.textList[index].set(ix)
+                index=index+1
+
 
         except Exception as e :
             print ("error !!!!!")
             print (e)
+            print(traceback.format_exc())
 
     def callbackGen(self,event):
             print("Click3" + str(event))
-            #do(event.widget.master.nametowidget(".maListe").get(ACTIVE))
             theClient=event.widget.master.nametowidget(".maListe").get(ACTIVE)
-            doc = Document()
-            doc.append(Command("title{TiLuNet}"))
-            doc.append(Command("maketitle"))
-            with doc.create(Section(theClient)):
-             with doc.create(Itemize()) as itemize:
-                     itemize.add_item("the first item")
-                     itemize.add_item("the second item")
-                     itemize.add_item("the third etc")
-                     # you can append to existing items
-                     itemize.append(Command("ldots"))
+            print("Generating the doc ")
+            event.widget.master.config(cursor="watch")
 
+            try :
+                aWritter = FactureWritter(self.clientList[theClient])
+                gentime=aWritter.printFacture()
+            except Exception as e :
+                print ("I have fail")
+                print (e)
+                messagebox.showerror("Erreur", str(e))
+                event.widget.master.config(cursor="arrow")
+                return
 
-            # create a bulleted "itemize" list like the below:
-            # \begin{itemize}
-            #   \item The first item
-            #   \item The second item
-            #   \item The third etc \ldots
-            # \end{itemize}
-
-            # with doc.create(Section(theClient)):
-            #     with doc.create(Itemize()) as itemize:
-            #         itemize.add_item("the first item")
-            #         itemize.add_item("the second item")
-            #         itemize.add_item("the third etc")
-            #         # you can append to existing items
-            #         itemize.append(Command("ldots"))
-
-            # create a numbered "enumerate" list like the below:
-            # \begin{enumerate}
-            #   \item The first item
-            #   \item The second item
-            #   \item The third etc \ldots
-            # \end{enumerate}
-
-            # with doc.create(Section('"Enumerate" list')):
-            #     with doc.create(Enumerate()) as enum:
-            #         enum.add_item("the first item")
-            #         enum.add_item("the second item")
-            #         enum.add_item(NoEscape("the third etc \\ldots"))
-
-            # create a labelled "description" list like the below:
-            # \begin{description}
-            #   \item[First] The first item
-            #   \item[Second] The second item
-            #   \item[Third] The third etc \ldots
-            # \end{description}
-
-            # with doc.create(Section('"Description" list')):
-            #     with doc.create(Description()) as desc:
-            #         desc.add_item("First", "The first item")
-            #         desc.add_item("Second", "The second item")
-            #         desc.add_item("Third", NoEscape("The third etc \\ldots"))
-            # doc.generate_tex('MyDoclists2')
-            doc.generate_pdf('MyDoclists', clean=True, clean_tex=False,
-                             compiler="pdflatex", compiler_args=None, silent=True)
-
-    def do (theClient) :
-
-        doc = Document()
-        doc.append(Command("title{TiLuNet}"))
-        doc.append(Command("maketitle"))
-        with doc.create(Section(theClient)):
-         with doc.create(Itemize()) as itemize:
-                 itemize.add_item("the first item")
-                 itemize.add_item("the second item")
-                 itemize.add_item("the third etc")
-                 # you can append to existing items
-                 itemize.append(Command("ldots"))
-
-
-        # create a bulleted "itemize" list like the below:
-        # \begin{itemize}
-        #   \item The first item
-        #   \item The second item
-        #   \item The third etc \ldots
-        # \end{itemize}
-
-        # with doc.create(Section(theClient)):
-        #     with doc.create(Itemize()) as itemize:
-        #         itemize.add_item("the first item")
-        #         itemize.add_item("the second item")
-        #         itemize.add_item("the third etc")
-        #         # you can append to existing items
-        #         itemize.append(Command("ldots"))
-
-        # create a numbered "enumerate" list like the below:
-        # \begin{enumerate}
-        #   \item The first item
-        #   \item The second item
-        #   \item The third etc \ldots
-        # \end{enumerate}
-
-        # with doc.create(Section('"Enumerate" list')):
-        #     with doc.create(Enumerate()) as enum:
-        #         enum.add_item("the first item")
-        #         enum.add_item("the second item")
-        #         enum.add_item(NoEscape("the third etc \\ldots"))
-
-        # create a labelled "description" list like the below:
-        # \begin{description}
-        #   \item[First] The first item
-        #   \item[Second] The second item
-        #   \item[Third] The third etc \ldots
-        # \end{description}
-
-        # with doc.create(Section('"Description" list')):
-        #     with doc.create(Description()) as desc:
-        #         desc.add_item("First", "The first item")
-        #         desc.add_item("Second", "The second item")
-        #         desc.add_item("Third", NoEscape("The third etc \\ldots"))
-        # doc.generate_tex('MyDoclists2')
-        doc.generate_pdf('MyDoclists', clean=True, clean_tex=False,
-                         compiler="pdflatex", compiler_args=None, silent=True)
+            event.widget.master.config(cursor="arrow")
+            messagebox.showinfo("Info","Facture créé avec succés (en "+str(gentime)+")")
+            print("Generating the doc : OK!")
 
 class MyDialog(simpledialog.Dialog):
+
     def body(self, master):
         self.title("Add client")
 
         Label(master, text="Nom du Client:").grid(row=0)
         Label(master, text="Adresse:").grid(row=1)
-        Label(master, text="Periode:").grid(row=2)
-
+        Label(master, text="Code postal:").grid(row=2)
+        Label(master, text="Ville:").grid(row=3)
+        Label(master, text="Mail:").grid(row=4)
+        Label(master, text="Periode:").grid(row=5)
+        Spinbox(master,values=("Mensuel", "Hebdomadaire", "Journalier")).grid(row=6)
         self.e1 = Entry(master)
         self.e2 = Entry(master)
         self.e3 = Entry(master)
+        self.e4 = Entry(master)
+        self.e5 = Entry(master)
+        self.e6 = Entry(master)
+        #self.e7 = Entry(master)
+
 
         self.e1.grid(row=0, column=1)
         self.e2.grid(row=1, column=1)
         self.e3.grid(row=2, column=1)
-
+        self.e4.grid(row=3, column=1)
+        self.e5.grid(row=4, column=1)
+        self.e6.grid(row=5, column=1)
+        self.client = None
         return self.e1 # initial focus
 
     def apply(self):
-        first = str(self.e1.get())
-        second = str(self.e2.get())
-        third = str(self.e3.get())
-        f = open('workfile.dat', 'a')
-        f.write("\n"+first+";"+second+";"+third)
-        f.close()
+        name = str(self.e1.get())
+        adress = str(self.e2.get())
+        zipcode=str(self.e3.get())
+        city=str(self.e4.get())
+        mail=str(self.e5.get())
+        period = str(self.e6.get())
 
-        print ( first, second,third) # or something
+        self.client = Client(name,adress,period,mail,city,zipcode)
+        f = open('workfile.dat', 'a')
+        f.write("\n"+self.client.toString())
+        f.close()
