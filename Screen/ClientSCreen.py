@@ -1,5 +1,5 @@
 import traceback
-
+from Command.logger import bcolors as pp
 from tkinter import *
 import tkinter.messagebox as messagebox
 import tkinter.simpledialog as simpledialog
@@ -7,23 +7,35 @@ import tkinter.simpledialog as simpledialog
 from Command.FactureWritter import FactureWritter
 from Bom.Client import Client
 
+global theSelectedClient
+
+
 class ClientSCreen:
     def __init__(self,master):
         self.master=master
         self.clientList = {}
         self.textList = []
+        self.listPhoto = []
+
+        for widget in master.grid_slaves():
+            #Don't touch the menu bar !
+            if widget.widgetName !="frame":
+                widget.destroy()
+
         for ix in range (0,7) :
             self.textList.append(StringVar())
+
 
         f = open('workfile.dat', 'r')
         for line in f:
             print(line)
             clientInfo = line.split(";")
             if(len(clientInfo)>5):
+                #TODO : Re-order this
                 aClient=Client(clientInfo[0], clientInfo[1],clientInfo[6], clientInfo[4],clientInfo[2],clientInfo[3],clientInfo[5])
                 self.clientList[aClient.name] = aClient
         f.close()
-
+        pp.printGreen("Load of  client DB OK")
         #Initialize the first item in the list as the details
         try :
             theFirstClient=str(list(self.clientList.keys())[0])
@@ -31,35 +43,43 @@ class ClientSCreen:
             for ix in range (0,len(theInfo)-1):
                 self.textList[ix].set(theInfo[ix])
         except Exception as e:
-            print ("Unbale to init the field")
+            pp.printError ("Unbale to init the field")
+            pp.printError(traceback.format_exc())
 
 
     def drawScreen (self) :
-        listPhoto= []
+
+
         # Toolbar
         rowIndex =  1
-        photo = PhotoImage(file="newClient.gif")
+        photo = PhotoImage(file="Ressources/newClient.gif")
         nP = photo.subsample(4, 4)
         w = Label(self.master, image=nP, text="Add client", compound="top")
         w.bind("<Button-1>", self.callbackAdd)
         w.photo = photo
         w.grid(row=rowIndex)
-
         rowIndex = rowIndex + 1
-        photo2 = PhotoImage(file="rmClient.gif")
+        photo2 = PhotoImage(file="Ressources/rmClient.gif")
         nP2 = photo2.subsample(4, 4)
         w2 = Label(self.master, image=nP2, text="Remove client", compound="top")
         w2.bind("<Button-1>", self.callbackRm)
         w2.photo = photo2
         w2.grid(row=rowIndex, padx=20)
-
         rowIndex = rowIndex + 1
-        photo3 = PhotoImage(file="30143-xsara54-Parametres.gif")
+        photo4= PhotoImage(file="Ressources/edit.gif")
+        nP4 = photo4.subsample(4, 4)
+        w4 = Label(self.master, image=nP4, text="edit client ", compound="top")
+        w4.bind("<Button-1>", self.callbackEdit)
+        w4.photo = photo2
+        w4.grid(row=rowIndex, padx=20)
+        rowIndex = rowIndex + 1
+        photo3 = PhotoImage(file="Ressources/30143-xsara54-Parametres.gif")
         nP3 = photo3.subsample(4, 4)
         w3 = Label(self.master, image=nP3, text="Générer facture", compound="top")
         w3.bind("<Button-1>", self.callbackGen)
         w3.photo = photo2
         w3.grid(row=rowIndex, padx=20)
+
 
 
         titleLB = Label(self.master,name="titleLB",text="Liste des clients",anchor=S,padx=0,pady=0)
@@ -72,12 +92,14 @@ class ClientSCreen:
             listbox.insert(END, client)
 
         #Avoid photo to be destroy by garbage collector
-        listPhoto.append(photo)
-        listPhoto.append(photo2)
-        listPhoto.append(photo3)
-        listPhoto.append(nP)
-        listPhoto.append(nP2)
-        listPhoto.append(nP3)
+        self.listPhoto.append(photo)
+        self.listPhoto.append(photo2)
+        self.listPhoto.append(photo3)
+        self.listPhoto.append(photo4)
+        self.listPhoto.append(nP)
+        self.listPhoto.append(nP2)
+        self.listPhoto.append(nP3)
+        self.listPhoto.append(nP4)
 
         #Client details
         try :
@@ -99,13 +121,12 @@ class ClientSCreen:
             clientMail = Label(self.master, name="clientMail", textvariable=self.textList[4], anchor=S, padx=0,
                                pady=0).grid(row=theRow, column=2, sticky=N + S)
         except Exception as e :
-            print ("Unable to draw CLient details")
-            print(e)
-            print(traceback.format_exc())
-        return listPhoto
+            pp.printError ("Unable to draw CLient details")
+            pp.printError(e)
+            pp.printError(traceback.format_exc())
+        return self.listPhoto
 
     def callbackAdd (self,event) :
-        print ("Click"+str(event))
         test = MyDialog(event.widget)
 
         if test.client is not None :
@@ -114,16 +135,16 @@ class ClientSCreen:
             print ("refresssssssssssssssssssssh")
             self.clientList[test.client.name]=test.client
             theList=event.widget.master.nametowidget(".maListe")
-            theList.delete(0, END)
-            for client in self.clientList:
-                print(")>" + client)
-                theList.insert(END, client)
+            theList.insert(END, test.client.name)
+            # theList.delete(0, END)
+            # for client in self.clientList:
+            #     print(")>" + client)
+            #     theList.insert(END, client)
         else :
             print ("Nothing return ... Do not refresh")
 
 
     def callbackRm (self,event) :
-        print ("Click2"+str(event))
         theList =event.widget.master.nametowidget(".maListe")
         print ("Item to rm=>"+theList.get(ACTIVE))
         print("Rmmmmmmmmmmmmmmmmmmm")
@@ -131,7 +152,6 @@ class ClientSCreen:
 
         #Now remove the items
         f = open('workfile.dat', 'w')
-        newClientList = {}
         del self.clientList[theList.get(ACTIVE)]
         for client in self.clientList:
             print ("# "+client+" "+theList.get(ACTIVE))
@@ -145,8 +165,30 @@ class ClientSCreen:
 
         theList.delete(0, END)
         for client in self.clientList:
-            print(")>" + client)
+           # print(")>" + client)
             theList.insert(END, client)
+
+    def callbackEdit(self,event):
+        #Not elegant way to transmitclient info to class MyDialog
+        event.widget.client=self.clientList[event.widget.master.nametowidget(".maListe").get(ACTIVE)]
+
+        global theSelectedClient
+        theSelectedClient = self.clientList[event.widget.master.nametowidget(".maListe").get(ACTIVE)]
+
+        test = MyDialog(event.widget)
+        if test.client is not None:
+            print(test.client.name)
+
+            print("edit")
+            self.clientList[test.client.name] = test.client
+            theList = event.widget.master.nametowidget(".maListe")
+            theList.insert(END, test.client.name)
+            # theList.delete(0, END)
+            # for client in self.clientList:
+            #     print(")>" + client)
+            #     theList.insert(END, client)
+        else:
+            print("Nothing return ... Do not refresh")
 
 
     def refreshClientDetails(self,event):
@@ -161,12 +203,11 @@ class ClientSCreen:
 
 
         except Exception as e :
-            print ("error !!!!!")
-            print (e)
-            print(traceback.format_exc())
+            pp.printError ("error !!!!!")
+            pp.printError (e)
+            pp.printError(traceback.format_exc())
 
     def callbackGen(self,event):
-            print("Click3" + str(event))
             theClient=event.widget.master.nametowidget(".maListe").get(ACTIVE)
             print("Generating the doc ")
             event.widget.master.config(cursor="watch")
@@ -175,15 +216,15 @@ class ClientSCreen:
                 aWritter = FactureWritter(self.clientList[theClient])
                 gentime=aWritter.printFacture()
             except Exception as e :
-                print ("I have fail")
-                print (e)
+                pp.printError ("I have fail")
+                pp.printError (e)
                 messagebox.showerror("Erreur", str(e))
                 event.widget.master.config(cursor="arrow")
                 return
 
             event.widget.master.config(cursor="arrow")
             messagebox.showinfo("Info","Facture créé avec succés (en "+str(gentime)+")")
-            print("Generating the doc : OK!")
+            pp.printGreen("Generating the doc : OK!")
 
 class MyDialog(simpledialog.Dialog):
 
@@ -196,14 +237,26 @@ class MyDialog(simpledialog.Dialog):
         Label(master, text="Ville:").grid(row=3)
         Label(master, text="Mail:").grid(row=4)
         Label(master, text="Periode:").grid(row=5)
-        Spinbox(master,values=("Mensuel", "Hebdomadaire", "Journalier")).grid(row=6)
+        #Label(master, text="Periode:").grid(row=6)
+
         self.e1 = Entry(master)
         self.e2 = Entry(master)
         self.e3 = Entry(master)
         self.e4 = Entry(master)
         self.e5 = Entry(master)
         self.e6 = Entry(master)
+        self.e7 = Spinbox(master, values=("Mensuel", "Hebdomadaire", "Journalier"))
         #self.e7 = Entry(master)
+        global theSelectedClient
+
+        print ("Pushing "+theSelectedClient.mail+"|")
+        self.e1.insert(0,theSelectedClient.name)
+        self.e2.insert(0,theSelectedClient.adress)
+        self.e3.insert(0,theSelectedClient.zipcode)
+        self.e4.insert(0,theSelectedClient.city)
+        self.e5.insert(0,theSelectedClient.mail)
+
+
 
 
         self.e1.grid(row=0, column=1)
@@ -211,7 +264,9 @@ class MyDialog(simpledialog.Dialog):
         self.e3.grid(row=2, column=1)
         self.e4.grid(row=3, column=1)
         self.e5.grid(row=4, column=1)
-        self.e6.grid(row=5, column=1)
+        self.e7.grid(row=5, column=1)
+
+
         self.client = None
         return self.e1 # initial focus
 
@@ -221,9 +276,9 @@ class MyDialog(simpledialog.Dialog):
         zipcode=str(self.e3.get())
         city=str(self.e4.get())
         mail=str(self.e5.get())
-        period = str(self.e6.get())
+        period = str(self.e7.get())
 
         self.client = Client(name,adress,period,mail,city,zipcode)
         f = open('workfile.dat', 'a')
-        f.write("\n"+self.client.toString())
+        f.write(self.client.toString()+"\n")
         f.close()
