@@ -2,25 +2,54 @@ from tkinter import *
 from tkinter import simpledialog
 # from PIL import Image, ImageTk
 import tkinter.messagebox as messagebox
-
+import collections
 from Screen.ClientSCreen import ClientSCreen
 from Screen.CalendarScreen import CalendarScreen
 from Command.logger import bcolors as pp
 
+import os
 
 import traceback
 
+import configparser
+global configFile
 
+def loadConfigFile():
+    pp.printGreen("Loading config file ...")
+    config = configparser.ConfigParser(defaults=None, dict_type=collections.OrderedDict, allow_no_value=True)
+    config.read('Config\\config.dat')
+    for section in config.sections():
+        print("["+section+"]")
+        for key in config[section]:
+            print ("   "+key+":"+str(config[section][key]))
+    pp.printGreen("Done")
+    return config
+
+def saveBeforeDestroy():
+    global configFile
+    try :
+        os.remove("./Config/config.old")
+    except:
+        print("No old config file to rm")
+    try :
+        os.rename("./Config/config.dat","./Config/config.old")
+    except:
+        print("No config file to backup")
+
+    with open('./Config/config.dat', 'w') as configfile:
+        configFile.write(configfile)
+    pp.printGreen("Config file save")
+    toplevel.destroy()
 
 
 def showCalendarSCreen(event):
     pp.printGreen("Drawing calendar")
-    screen=CalendarScreen(event.widget.master.master)
+    screen=CalendarScreen(event.widget.master.master,configFile)
     screen.drawScreen()
 
 def showClientScreen(event):
     pp.printGreen("Drawing Client")
-    screen=ClientSCreen(event.widget.master.master)
+    screen=ClientSCreen(event.widget.master.master,configFile)
     screen.drawScreen()
 
 def showOtherSCreen (event):
@@ -39,10 +68,15 @@ def showOtherSCreen (event):
 ##################
 # Main code
 #####################
+
+global configFile
+configFile=loadConfigFile()
+
 root = Tk()
 root.title("Mine")
 
 toplevel = root.winfo_toplevel()
+toplevel.protocol("WM_DELETE_WINDOW", saveBeforeDestroy)
 #toplevel.wm_state('zoomed')
 
 #print ("maxX="+str(root.winfo_screenwidth())+" "+str(root.winfo_screenheight()))
@@ -76,11 +110,9 @@ try :
 
 
     #Screen Clients
-    pp.printGreen("OK")
-    #myScreen=ClientSCreen(root)
-    # listPhoto=myScreen.drawScreen()
-    mySCreen=CalendarScreen(root)
-    mySCreen.drawScreen()
+    myScreen=ClientSCreen(root,configFile)
+    #myScreen=CalendarScreen(root,configFile)
+    myScreen.drawScreen()
     root.mainloop()
 
     #root.destroy()  # optional; see description below

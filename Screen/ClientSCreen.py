@@ -1,18 +1,25 @@
 import traceback
-from Command.logger import bcolors as pp
+import configparser
+import os
+
 from tkinter import *
 import tkinter.messagebox as messagebox
 import tkinter.simpledialog as simpledialog
 
+
+from Command.logger import bcolors as pp
 from Command.FactureWritter import FactureWritter
 from Bom.Client import Client
+
+
 
 global theSelectedClient
 
 
 class ClientSCreen:
-    def __init__(self,master):
+    def __init__(self,master,config):
         self.master=master
+        self.config=config
         self.clientList = {}
         self.textList = []
         self.listPhoto = []
@@ -26,15 +33,11 @@ class ClientSCreen:
             self.textList.append(StringVar())
 
 
-        f = open('workfile.dat', 'r')
-        for line in f:
-            print(line)
-            clientInfo = line.split(";")
-            if(len(clientInfo)>5):
-                #TODO : Re-order this
-                aClient=Client(clientInfo[0], clientInfo[1],clientInfo[6], clientInfo[4],clientInfo[2],clientInfo[3],clientInfo[5])
-                self.clientList[aClient.name] = aClient
-        f.close()
+        for client in config["clientsDB"]:
+            print ("New client to load ... "+client)
+            aClient=self.loadClientInfo(client)
+            self.clientList[aClient.name] = aClient
+
         pp.printGreen("Load of  client DB OK")
         #Initialize the first item in the list as the details
         try :
@@ -46,6 +49,16 @@ class ClientSCreen:
             pp.printError ("Unbale to init the field")
             pp.printError(traceback.format_exc())
 
+
+    def loadClientInfo(self,clientName):
+        try:
+            config = configparser.ConfigParser()
+            config.read('Config\\'+clientName+'.dat')
+            aClient=Client(config["info"]["name"],config["info"]["adress"],config["info"]["period"],config["info"]["mail"],config["info"]["zipcode"],config["info"]["amount"])
+            return aClient
+        except :
+            pp.printError("Unable to open config file for  "+clientName)
+            pp.printError(traceback.format_exc())
 
     def drawScreen (self) :
 
@@ -140,6 +153,7 @@ class ClientSCreen:
             # for client in self.clientList:
             #     print(")>" + client)
             #     theList.insert(END, client)
+            self.config["clientsDB"][test.client.name]=""
         else :
             print ("Nothing return ... Do not refresh")
 
@@ -151,42 +165,34 @@ class ClientSCreen:
 
 
         #Now remove the items
-        f = open('workfile.dat', 'w')
+        #Rm client config file
+        os.remove("Config\\"+theList.get(ACTIVE)+".dat")
+        #Rm client from config
+        del self.config["clientsDB"][theList.get(ACTIVE)]
+
         del self.clientList[theList.get(ACTIVE)]
-        for client in self.clientList:
-            print ("# "+client+" "+theList.get(ACTIVE))
-            if client != theList.get(ACTIVE):
-                f.write( client + ";" + self.clientList[client].adress + ";" + self.clientList[client].period+"\n")
-            else :
-                print ("Skip this item =>"+theList.get(ACTIVE))
-
-        f.close()
-
-
         theList.delete(0, END)
         for client in self.clientList:
            # print(")>" + client)
             theList.insert(END, client)
 
     def callbackEdit(self,event):
-        #Not elegant way to transmitclient info to class MyDialog
+        #Not elegant way to transmit client info to class MyDialog
         event.widget.client=self.clientList[event.widget.master.nametowidget(".maListe").get(ACTIVE)]
-
+        oldClientName=self.clientList[event.widget.master.nametowidget(".maListe").get(ACTIVE)].name
         global theSelectedClient
         theSelectedClient = self.clientList[event.widget.master.nametowidget(".maListe").get(ACTIVE)]
 
         test = MyDialog(event.widget)
         if test.client is not None:
-            print(test.client.name)
-
-            print("edit")
+            del self.clientList[oldClientName]
             self.clientList[test.client.name] = test.client
             theList = event.widget.master.nametowidget(".maListe")
             theList.insert(END, test.client.name)
-            # theList.delete(0, END)
-            # for client in self.clientList:
-            #     print(")>" + client)
-            #     theList.insert(END, client)
+            theList.delete(0, END)
+            for client in self.clientList:
+                 print(")>" + client)
+                 theList.insert(END, client)
         else:
             print("Nothing return ... Do not refresh")
 
@@ -212,15 +218,19 @@ class ClientSCreen:
             print("Generating the doc ")
             event.widget.master.config(cursor="watch")
 
-            try :
+            try:
                 aWritter = FactureWritter(self.clientList[theClient])
-                gentime=aWritter.printFacture()
-            except Exception as e :
-                pp.printError ("I have fail")
-                pp.printError (e)
+                gentime = aWritter.printFacture()
+
+            except Exception as e:
+                pp.printError("I have fail")
+                pp.printError(e)
                 messagebox.showerror("Erreur", str(e))
                 event.widget.master.config(cursor="arrow")
                 return
+
+
+
 
             event.widget.master.config(cursor="arrow")
             messagebox.showinfo("Info","Facture créé avec succés (en "+str(gentime)+")")
@@ -236,8 +246,8 @@ class MyDialog(simpledialog.Dialog):
         Label(master, text="Code postal:").grid(row=2)
         Label(master, text="Ville:").grid(row=3)
         Label(master, text="Mail:").grid(row=4)
-        Label(master, text="Periode:").grid(row=5)
-        #Label(master, text="Periode:").grid(row=6)
+        Label(master, text="Montant:").grid(row=5)
+        Label(master, text="Periode:").grid(row=6)
 
         self.e1 = Entry(master)
         self.e2 = Entry(master)
@@ -249,12 +259,16 @@ class MyDialog(simpledialog.Dialog):
         #self.e7 = Entry(master)
         global theSelectedClient
 
-        print ("Pushing "+theSelectedClient.mail+"|")
-        self.e1.insert(0,theSelectedClient.name)
-        self.e2.insert(0,theSelectedClient.adress)
-        self.e3.insert(0,theSelectedClient.zipcode)
-        self.e4.insert(0,theSelectedClient.city)
-        self.e5.insert(0,theSelectedClient.mail)
+        try :
+            print ("Pushing "+theSelectedClient.name+"|")
+            self.e1.insert(0, theSelectedClient.name)
+            self.e2.insert(0, theSelectedClient.adress)
+            self.e3.insert(0, theSelectedClient.zipcode)
+            self.e4.insert(0, theSelectedClient.city)
+            self.e5.insert(0, theSelectedClient.mail)
+            self.e6.insert(0, theSelectedClient.amount)
+        except :
+            print ("New Client")
 
 
 
@@ -264,7 +278,8 @@ class MyDialog(simpledialog.Dialog):
         self.e3.grid(row=2, column=1)
         self.e4.grid(row=3, column=1)
         self.e5.grid(row=4, column=1)
-        self.e7.grid(row=5, column=1)
+        self.e6.grid(row=5, column=1)
+        self.e7.grid(row=6, column=1)
 
 
         self.client = None
@@ -276,9 +291,8 @@ class MyDialog(simpledialog.Dialog):
         zipcode=str(self.e3.get())
         city=str(self.e4.get())
         mail=str(self.e5.get())
+        amount=str(self.e6.get())
         period = str(self.e7.get())
 
-        self.client = Client(name,adress,period,mail,city,zipcode)
-        f = open('workfile.dat', 'a')
-        f.write(self.client.toString()+"\n")
-        f.close()
+        self.client = Client(name,adress,period,mail,city,zipcode,amount)
+        self.client.toConfig(True)

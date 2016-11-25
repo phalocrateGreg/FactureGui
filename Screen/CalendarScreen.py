@@ -5,12 +5,12 @@ from tkinter import font as tkFont
 from datetime import datetime, date, time,timedelta
 import calendar
 from Bom.Client import Client
-from  math import floor
+
 
 class CalendarScreen:
-    def __init__(self,master):
+    def __init__(self,master,config):
         self.master=master
-
+        self.config=config
 
         for widget in master.grid_slaves():
            # print(widget)
@@ -19,6 +19,14 @@ class CalendarScreen:
             if widget.widgetName !="frame":
                 widget.destroy()
 
+    def highlightMe(self,event):
+        event.widget["bg"]="light blue"
+
+    def hideMe(self, event):
+            event.widget["bg"] = "SystemWindow"
+
+    def showDetails(self,event):
+        pp.printGreen("Click on :"+str(event.widget))
 
     def drawCalendar(self,master):
         aFakeLabel = Label(master, text="W" + str(1))
@@ -26,12 +34,15 @@ class CalendarScreen:
         myFont.config(weight=tkFont.BOLD)
 
         day_list = ["Er", "Lu", "Ma", "Me", "Je", "Ve", "Sa", "Di"]
-        todayDate = datetime.now().date()
+        today=datetime.now()
+        todayDate = today.date()
         daysInCurrentMonth = calendar.monthrange(todayDate.year, todayDate.month)[1] + 1
         shiftValue=datetime(todayDate.year, todayDate.month, 1).date().weekday()
 
+        currentWeek=int(datetime.strftime(today,'%W'))
+        currentWeek-=1
         pp.printGreen("Today is :"+str(todayDate))
-        master.config(text= datetime.now().strftime('%B'))
+        master.config(text= today.strftime('%B'))
 
 
         #Comptue number of displayable week
@@ -40,26 +51,27 @@ class CalendarScreen:
             maxWeek=6
         maxWeek+=1
 
-        pp.printGreen(str(maxWeek))
-
         #Header print of calendar
         for aDay in range(1, 8):
             aLabel = Label(master, text=str(day_list[aDay]),font=myFont).grid(row=0,column=aDay)
-        for aWeek in range(1,maxWeek):
-                aLabel=Label(master, text="w"+str(aWeek),font=myFont)
+        for aWeek in range(1,int(maxWeek)):
+                aLabel=Label(master, text="w"+str(aWeek+currentWeek),font=myFont)
                 aLabel.grid(row=aWeek+1,column=0)
 
         #Print calendar
         column = 1+shiftValue
         row = 2
         for aDay in range (1,daysInCurrentMonth):
-            aLabel = Label(master, text=str(aDay))
+            aLabel = Label(master, text=str(aDay),name=str(aDay))
             if aDay == todayDate.day:
-                aLabel = Label(master, text=str(aDay),fg="red",font=myFont)
+                aLabel = Label(master, text=str(aDay),fg="red",font=myFont,name=str(aDay))
             if column >7 :
                 row+=1
                 column=1
             aLabel.grid(row=row, column=column )
+            aLabel.bind("<Button-1>", self.showDetails)
+            aLabel.bind("<Enter>", self.highlightMe)
+            aLabel.bind("<Leave>", self.hideMe)
             column+=1
 
 

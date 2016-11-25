@@ -1,12 +1,19 @@
 from pylatex import Document, Section, Itemize, Enumerate, Description,  Command, NoEscape,Figure,Package
 import os
+import sys
 from datetime import datetime, date, time,timedelta
+from Command.logger import bcolors as pp
 from Bom.Client import Client
 
 class FactureWritter :
     def __init__(self,aClient):
         self.client=aClient
         self.formatDate="%d/%m/%y"
+        self.destination="Output\\"+aClient.name+"\\"
+        if not os.path.isdir(self.destination):
+            pp.printWarning("Path :"+self.destination+" does not exist")
+            os.makedirs(self.destination)
+
 
     def printFacture (self):
 
@@ -18,17 +25,28 @@ class FactureWritter :
 
             doc = Document()
             doc.packages.append(Package('eurosym', options=['official']))
+            #doc.append(Command("title{TiLuNet}"))
+            #doc.append(Command("maketitle"))
 
-           
-            #image_filename =  '../logo.png'
-            #with doc.create(Figure(position='h!')) as kitten_pic:
-            #    kitten_pic.add_image(image_filename, width='120px')
+            #doc.append(Command("includegraphics","\"logo.png\""))
+            image_filename =  '../../Ressources/logo.png'
+            with doc.create(Figure(position='h!')) as kitten_pic:
+                kitten_pic.add_image(image_filename, width='120px')
 
             #Company info
-
+            doc.append(Command("quad"))
+            doc.append(Command("newline"))
+            doc.append("FIDEL Lucette")
+            doc.append(Command("newline"))
+            doc.append("139 avenue Corniche Fleurie")
+            doc.append(Command("newline"))
+            doc.append("06200 NICE")
+            doc.append(Command("newline"))
+            doc.append(Command("underline","SIRET"))
+            doc.append("52148565600016")
 
             #
-            with doc.create(Section("FACTURE N "+str(theSartDate.year)+"-",False)):
+            with doc.create(Section("FACTURE N "+str(theSartDate.year)+"-"+self.client.lastFactureId()+1,False)):
                 doc.append("Émise le "+str(theSartDate.date().strftime(self.formatDate)) + ", à payer le " + theTargetDate.date().strftime(self.formatDate))
                 doc.append(Command("newline"))
 
@@ -41,7 +59,7 @@ class FactureWritter :
                 doc.append(Command("end", "bfseries"))
                 doc.append(Command("end", "center"))
 
-                
+                #doc.append("Total HT" + Command("dotfill") + "291 €")
                 doc.append("Total HT")
                 doc.append( Command("dotfill"))
                 doc.append( "291")
@@ -62,11 +80,12 @@ class FactureWritter :
                 doc.append(Command("end", "bfseries"))
                 doc.append(Command("newline"))
 
-            doc.generate_pdf('Output\\Facture_'+self.client.name, clean=True, clean_tex=False,
+            doc.generate_pdf(self.destination+'Facture_'+self.client.name, clean=True, clean_tex=False,
                              compiler="pdflatex", compiler_args=None, silent=True)
 
             theEndDate=datetime.now()
             print("Fin de la génération :"+str(theEndDate))
             genTime=theEndDate-theSartDate
             print ("Temps de gen="+str(genTime))
+
             return  genTime
