@@ -1,0 +1,10 @@
+[compagnyInfo]
+namecompagny = MyCompagny
+siretnumber = 123456
+name = Me mi
+adress = anywhere	
+city = 123456 city
+
+[clientsDB]
+nomClient
+
