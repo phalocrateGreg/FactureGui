@@ -36,6 +36,7 @@ class ClientSCreen:
         for client in config["clientsDB"]:
             print ("New client to load ... "+client)
             aClient=self.loadClientInfo(client)
+            aClient.loadConfig()
             self.clientList[aClient.name] = aClient
 
         pp.printGreen("Load of  client DB OK")
@@ -225,16 +226,18 @@ class ClientSCreen:
             except Exception as e:
                 pp.printError("I have fail")
                 pp.printError(e)
+                pp.printError(traceback.format_exc())
                 messagebox.showerror("Erreur", str(e))
                 event.widget.master.config(cursor="arrow")
                 return
 
-
-
-
+            for aFac in self.clientList[theClient].factureList:
+                print (aFac.toString())
+            pp.printGreen("Generating the doc : OK!")
             event.widget.master.config(cursor="arrow")
             messagebox.showinfo("Info","Facture créé avec succés (en "+str(gentime)+")")
-            pp.printGreen("Generating the doc : OK!")
+            self.clientList[theClient].toConfig(True)
+
 
 class MyDialog(simpledialog.Dialog):
 

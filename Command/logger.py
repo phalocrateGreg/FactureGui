@@ -19,7 +19,7 @@ class bcolors:
 
     @staticmethod
     def printError(mess):
-         print (bcolors.FAIL+mess+bcolors.ENDC)
+         print (bcolors.FAIL+str(mess)+bcolors.ENDC)
 
     @staticmethod
     def printWarning(mess):

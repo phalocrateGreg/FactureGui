@@ -1,5 +1,6 @@
 from datetime import datetime, date, time,timedelta
 
+
 class Facture:
 
      def __init__(self,numberId,clientName,editionDate=None,dueDate=None,amount=0):
@@ -11,10 +12,19 @@ class Facture:
             self.editionDate = editionDate
 
         if dueDate is None:
-            self.dueDate = editionDate+timedelta(days=30)
+            self.dueDate = self.editionDate+timedelta(days=30)
         else :
             self.dueDate= dueDate
+
         self.amount=amount
+
+     def toString(self):
+         print ("Facture :"+str(self.numberId))
+         print (self.clientName)
+         print (self.editionDate)
+         print (self.dueDate)
+         print(self.amount)
+
 
 
 

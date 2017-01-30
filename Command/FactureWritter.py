@@ -3,7 +3,7 @@ import os
 import sys
 from datetime import datetime, date, time,timedelta
 from Command.logger import bcolors as pp
-from Bom.Client import Client
+from Bom.Facture import Facture
 
 class FactureWritter :
     def __init__(self,aClient):
@@ -13,7 +13,7 @@ class FactureWritter :
         if not os.path.isdir(self.destination):
             pp.printWarning("Path :"+self.destination+" does not exist")
             os.makedirs(self.destination)
-
+        self.factureClient = Facture(self.client.lastFactureId+1,self.client.name)
 
     def printFacture (self):
 
@@ -46,7 +46,7 @@ class FactureWritter :
             doc.append("52148565600016")
 
             #
-            with doc.create(Section("FACTURE N "+str(theSartDate.year)+"-"+self.client.lastFactureId()+1,False)):
+            with doc.create(Section("FACTURE N "+str(theSartDate.year)+"-"+str(self.client.lastFactureId+1),False)):
                 doc.append("Émise le "+str(theSartDate.date().strftime(self.formatDate)) + ", à payer le " + theTargetDate.date().strftime(self.formatDate))
                 doc.append(Command("newline"))
 
@@ -80,12 +80,13 @@ class FactureWritter :
                 doc.append(Command("end", "bfseries"))
                 doc.append(Command("newline"))
 
-            doc.generate_pdf(self.destination+'Facture_'+self.client.name, clean=True, clean_tex=False,
+            doc.generate_pdf(self.destination+'Facture_'+self.client.name+"-"+str(self.client.lastFactureId+1), clean=True, clean_tex=False,
                              compiler="pdflatex", compiler_args=None, silent=True)
 
             theEndDate=datetime.now()
             print("Fin de la génération :"+str(theEndDate))
+            self.client.lastFactureId+=1
             genTime=theEndDate-theSartDate
             print ("Temps de gen="+str(genTime))
-
+            self.client.factureList.append(self.factureClient)
             return  genTime
