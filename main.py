@@ -6,13 +6,15 @@ import collections
 from Screen.ClientSCreen import ClientSCreen
 from Screen.CalendarScreen import CalendarScreen
 from Command.logger import bcolors as pp
+from Bom.Client import Client
 
 import os
-
+import sys
 import traceback
-
 import configparser
+
 global configFile
+global clientList 
 
 def loadConfigFile():
     pp.printGreen("Loading config file ...")
@@ -24,6 +26,16 @@ def loadConfigFile():
             print ("   "+key+":"+str(config[section][key]))
     pp.printGreen("Done")
     return config
+
+def loadClientInfo(clientName):
+        try:
+            config = configparser.ConfigParser()
+            config.read('Config\\'+clientName+'.dat')
+            aClient=Client(config["info"]["name"],config["info"]["adress"],config["info"]["period"],config["info"]["mail"],config["info"]["zipcode"],config["info"]["amount"])
+            return aClient
+        except :
+            pp.printError("Unable to open config file for  "+clientName)
+            pp.printError(traceback.format_exc())
 
 def saveBeforeDestroy():
     global configFile
@@ -44,12 +56,14 @@ def saveBeforeDestroy():
 
 def showCalendarSCreen(event):
     pp.printGreen("Drawing calendar")
-    screen=CalendarScreen(event.widget.master.master,configFile)
+    global clientList
+    screen=CalendarScreen(event.widget.master.master,configFile,clientList)
     screen.drawScreen()
 
 def showClientScreen(event):
     pp.printGreen("Drawing Client")
-    screen=ClientSCreen(event.widget.master.master,configFile)
+    global clientList
+    screen=ClientSCreen(event.widget.master.master,configFile,clientList)
     screen.drawScreen()
 
 def showOtherSCreen (event):
@@ -68,9 +82,21 @@ def showOtherSCreen (event):
 ##################
 # Main code
 #####################
+sys.path.insert(0, os.path.realpath(__file__))
 
+#Load data
 global configFile
 configFile=loadConfigFile()
+
+global clientList 
+clientList = {}
+for client in configFile["clientsDB"]:
+    print ("New client to load ... "+client)
+    aClient=loadClientInfo(client)
+    aClient.loadConfig()
+    clientList[aClient.name] = aClient
+#####################################################
+
 
 root = Tk()
 root.title("Mine")
@@ -110,7 +136,7 @@ try :
 
 
     #Screen Clients
-    myScreen=ClientSCreen(root,configFile)
+    myScreen=ClientSCreen(root,configFile,clientList)
     #myScreen=CalendarScreen(root,configFile)
     myScreen.drawScreen()
     root.mainloop()

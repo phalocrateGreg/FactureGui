@@ -17,13 +17,13 @@ global theSelectedClient
 
 
 class ClientSCreen:
-    def __init__(self,master,config):
+    def __init__(self,master,config,clientList):
         self.master=master
         self.config=config
-        self.clientList = {}
+        self.clientList = clientList
         self.textList = []
         self.listPhoto = []
-
+        self.activeClient = ""
         for widget in master.grid_slaves():
             #Don't touch the menu bar !
             if widget.widgetName !="frame":
@@ -33,16 +33,18 @@ class ClientSCreen:
             self.textList.append(StringVar())
 
 
-        for client in config["clientsDB"]:
+        '''for client in config["clientsDB"]:
             print ("New client to load ... "+client)
             aClient=self.loadClientInfo(client)
             aClient.loadConfig()
             self.clientList[aClient.name] = aClient
 
         pp.printGreen("Load of  client DB OK")
+        '''
         #Initialize the first item in the list as the details
         try :
             theFirstClient=str(list(self.clientList.keys())[0])
+            self.activeClient=theFirstClient
             theInfo=self.clientList[theFirstClient].toList()
             for ix in range (0,len(theInfo)-1):
                 self.textList[ix].set(theInfo[ix])
@@ -62,7 +64,6 @@ class ClientSCreen:
             pp.printError(traceback.format_exc())
 
     def drawScreen (self) :
-
 
         # Toolbar
         rowIndex =  1
@@ -134,10 +135,23 @@ class ClientSCreen:
             theRow = theRow + 1
             clientMail = Label(self.master, name="clientMail", textvariable=self.textList[4], anchor=S, padx=0,
                                pady=0).grid(row=theRow, column=2, sticky=N + S)
+
+            theRow = theRow + 1
+            titleLBfacture = Label(self.master,name="titleLB2",text="Factures Client",anchor=S,padx=0,pady=0)
+            titleLBfacture.grid(row=theRow,column=2)
+            theRow = theRow + 1
+            listboxFact = Listbox(self.master, name="maListeFac")
+            listboxFact.grid(row=theRow, column=2, sticky=N + S)
+            pp.printGreen("currentClient="+self.activeClient)
+            for aFact in self.clientList[self.activeClient].factureList:
+                print(">2 " + aFact.numberId)
+                listboxFact.insert(END, aFact.numberId+"-"+aFact.editionDate)
+
         except Exception as e :
             pp.printError ("Unable to draw CLient details")
             pp.printError(e)
             pp.printError(traceback.format_exc())
+
         return self.listPhoto
 
     def callbackAdd (self,event) :
@@ -162,8 +176,6 @@ class ClientSCreen:
     def callbackRm (self,event) :
         theList =event.widget.master.nametowidget(".maListe")
         print ("Item to rm=>"+theList.get(ACTIVE))
-        print("Rmmmmmmmmmmmmmmmmmmm")
-
 
         #Now remove the items
         #Rm client config file
@@ -202,6 +214,8 @@ class ClientSCreen:
         try :
             theList = self.master.nametowidget(".maListe")
             theListInfo=self.clientList[theList.get(ACTIVE)].toList()
+            global theSelectedClient
+            self.activeClient=event.widget.master.nametowidget(".maListe").get(ACTIVE)
             index=0
             for ix in theListInfo:
                 print (ix)
@@ -213,7 +227,7 @@ class ClientSCreen:
             pp.printError ("error !!!!!")
             pp.printError (e)
             pp.printError(traceback.format_exc())
-
+            
     def callbackGen(self,event):
             theClient=event.widget.master.nametowidget(".maListe").get(ACTIVE)
             print("Generating the doc ")
