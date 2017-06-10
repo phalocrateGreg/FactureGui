@@ -32,6 +32,7 @@ class Client:
             pp.printGreen("Loading config file for client "+self.name+" ...")
             self.config = configparser.ConfigParser()
             self.config.read('./Config/'+self.name+".dat")
+            section="1"
             for section in self.config.sections():
                 print("[" + section + "]")
                 if section != "info":
@@ -40,7 +41,6 @@ class Client:
                     aNewFacture =  Facture.Facture (section,self.name,str(self.config[section]["editionDate"]),str(self.config[section]["dueDate"]),self.config[section]["amount"])
                    # aNewFacture = Facture.Facture(1,"Nom","2017-01-01","2017-01-01",10)
                     self.factureList.append(aNewFacture)
-
             self.lastFactureId=int(section)
             pp.printGreen("Done")
         except :

@@ -8,16 +8,38 @@ from Bom.Client import Client
 
 
 class CalendarScreen:
-    def __init__(self,master,config):
+    def __init__(self,master,config,clientList):
         self.master=master
         self.config=config
-
+        self.clientList = clientList
+        self.listOfDueDate = {}
+        self.listOfLateFact = {}
+        self.listOfIncomingFact = {}
+        self.buildListOfDueDate()
+        self.yearMonth = ""
+        self.detaislLabel = StringVar()
         for widget in master.grid_slaves():
-           # print(widget)
-           # print (widget.widgetName)
             #Don't touch the menu bar !
             if widget.widgetName !="frame":
                 widget.destroy()
+
+    def buildListOfDueDate (self) :
+        today=datetime.now()
+        todayDate = today.date()
+        for aClient in self.clientList:
+            for aFact in self.clientList[aClient].factureList:
+                aDueDate=aFact.dueDate
+                aDate=datetime.strptime(aDueDate, '%Y-%m-%d')
+                if aDate.date() < todayDate:
+                    pp.printWarning("A facture is late ! >>>>>>>>>"+aDueDate)
+                    if aDueDate in self.listOfLateFact:                    
+                        self.listOfLateFact[aDueDate]=    self.listOfLateFact[aDueDate]+";"+aClient
+                    else :
+                        self.listOfLateFact[aDueDate]=aClient
+                if aDueDate in self.listOfDueDate:                    
+                    self.listOfDueDate[aDueDate]=    self.listOfDueDate[aDueDate]+aClient
+                else :
+                    self.listOfDueDate[aDueDate]=aClient
 
     def highlightMe(self,event):
         event.widget["bg"]="light blue"
@@ -27,6 +49,15 @@ class CalendarScreen:
 
     def showDetails(self,event):
         pp.printGreen("Click on :"+str(event.widget))
+        theClickedDate=event.widget.config("text")[4]
+        if len(theClickedDate)<2:
+            theClickedDate="0"+theClickedDate
+        print("   Click on :"+theClickedDate)
+        theKey=self.yearMonth+theClickedDate
+        if theKey in self.listOfDueDate:
+            self.detaislLabel.set(theKey+" "+self.listOfDueDate[theKey])
+        else :
+            self.detaislLabel.set(theKey)
 
     def drawCalendar(self,master):
         aFakeLabel = Label(master, text="W" + str(1))
@@ -36,9 +67,15 @@ class CalendarScreen:
         day_list = ["Er", "Lu", "Ma", "Me", "Je", "Ve", "Sa", "Di"]
         today=datetime.now()
         todayDate = today.date()
+        
         daysInCurrentMonth = calendar.monthrange(todayDate.year, todayDate.month)[1] + 1
         shiftValue=datetime(todayDate.year, todayDate.month, 1).date().weekday()
 
+        self.yearMonth=str(todayDate.year)+"-"
+        currentMonth=str(todayDate.month)
+        if len(currentMonth) < 2:
+           currentMonth="0" +currentMonth
+        self.yearMonth=self.yearMonth+currentMonth+"-"
         currentWeek=int(datetime.strftime(today,'%W'))
         currentWeek-=1
         pp.printGreen("Today is :"+str(todayDate))
@@ -63,8 +100,16 @@ class CalendarScreen:
         row = 2
         for aDay in range (1,daysInCurrentMonth):
             aLabel = Label(master, text=str(aDay),name=str(aDay))
+            fullDay=str(aDay)
+            if len(fullDay) < 2:
+                fullDay="0"+fullDay
+            fullDay=self.yearMonth+fullDay
             if aDay == todayDate.day:
+                aLabel = Label(master, text=str(aDay),fg="blue",font=myFont,name=str(aDay))
+            elif fullDay in self.listOfDueDate:
+                pp.printWarning("Find a due date "+str(aDay))
                 aLabel = Label(master, text=str(aDay),fg="red",font=myFont,name=str(aDay))
+
             if column >7 :
                 row+=1
                 column=1
@@ -85,6 +130,17 @@ class CalendarScreen:
         aFakeLabel = Label(self.master, text="W" + str(1))
         myFont = tkFont.Font(font=aFakeLabel['font'])
         myFont.config(weight=tkFont.BOLD)
-        titleLB = Label(self.master, name="titleLB", text="Prochaine échéance", anchor=S, padx=50, pady=0,font=myFont).grid(row=1,column=1)
-        for ix in range (1,10):
-            aLabel =Label(self.master, text="echéance "+str(ix)).grid(row=ix+1,column=1)
+
+        titleLateFact = Label(self.master, name="titleLateFAct", text="Factures en retard", anchor=S, padx=50, pady=0,font=myFont).grid(row=1,column=1)
+        ix=1
+        for jx in self.listOfLateFact:
+            aLabel =Label(self.master, text="Les factures auraient dû être payée le  "+str(jx)+" pour "+str(self.listOfLateFact[jx])).grid(row=ix+1,column=1)
+            ix=ix+1
+        
+        titleLB = Label(self.master, name="titleLB", text="Prochaine échéance", anchor=S, padx=50, pady=0,font=myFont).grid(row=ix+1,column=1)
+        #for kx in range (2,10):
+        #    aLabel =Label(self.master, text="echéance "+str(ix)).grid(row=ix+1,column=1)
+
+        ix=ix+1
+        titleLB2 = Label(self.master, name="titleLB2", text="Détails", anchor=S, padx=50, pady=0,font=myFont).grid(row=ix,column=1)
+        theDetailsLabel =Label(self.master, name="theDetailsLabel", textvariable=self.detaislLabel, text=" "+str(ix)).grid(row=ix+1,column=1)
