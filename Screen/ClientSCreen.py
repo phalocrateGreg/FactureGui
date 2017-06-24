@@ -103,7 +103,7 @@ class ClientSCreen:
         listbox.bind("<Double-Button-1>", self.refreshClientDetails)
         listbox.grid(row=2, column=1, rowspan=3, sticky=N + S)
         for client in self.clientList:
-            print(">1 " + client)
+           # print(">1 " + client)
             listbox.insert(END, client)
 
         #Avoid photo to be destroy by garbage collector
@@ -144,7 +144,7 @@ class ClientSCreen:
             listboxFact.grid(row=theRow, column=2, sticky=N + S)
             pp.printGreen("currentClient="+self.activeClient)
             for aFact in self.clientList[self.activeClient].factureList:
-                print(">2 " + aFact.numberId)
+               # print(">2 " + aFact.numberId)
                 listboxFact.insert(END, aFact.numberId+"-"+aFact.editionDate)
 
         except Exception as e :
