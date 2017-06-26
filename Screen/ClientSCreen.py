@@ -5,7 +5,7 @@ import os
 from tkinter import *
 import tkinter.messagebox as messagebox
 import tkinter.simpledialog as simpledialog
-
+from tkinter import font as tkFont
 
 from Command.logger import bcolors as pp
 from Command.FactureWritter import FactureWritter
@@ -24,6 +24,8 @@ class ClientSCreen:
         self.textList = []
         self.listPhoto = []
         self.activeClient = ""
+        self.listFactures = []
+
         for widget in master.grid_slaves():
             #Don't touch the menu bar !
             if widget.widgetName !="frame":
@@ -32,15 +34,6 @@ class ClientSCreen:
         for ix in range (0,7) :
             self.textList.append(StringVar())
 
-
-        '''for client in config["clientsDB"]:
-            print ("New client to load ... "+client)
-            aClient=self.loadClientInfo(client)
-            aClient.loadConfig()
-            self.clientList[aClient.name] = aClient
-
-        pp.printGreen("Load of  client DB OK")
-        '''
         #Initialize the first item in the list as the details
         try :
             theFirstClient=str(list(self.clientList.keys())[0])
@@ -48,6 +41,11 @@ class ClientSCreen:
             theInfo=self.clientList[theFirstClient].toList()
             for ix in range (0,len(theInfo)-1):
                 self.textList[ix].set(theInfo[ix])
+            
+            index =0
+           # for ix in self.clientList[theFirstClient].factureList:
+           #     self.listFactures[index].append(StringVar(ix))
+           #     index=index+1
         except Exception as e:
             pp.printError ("Unbale to init the field")
             pp.printError(traceback.format_exc())
@@ -64,7 +62,6 @@ class ClientSCreen:
             pp.printError(traceback.format_exc())
 
     def drawScreen (self) :
-
         # Toolbar
         rowIndex =  1
         photo = PhotoImage(file="Ressources/newClient.gif")
@@ -95,17 +92,6 @@ class ClientSCreen:
         w3.photo = photo2
         w3.grid(row=rowIndex, padx=20)
 
-
-
-        titleLB = Label(self.master,name="titleLB",text="Liste des clients",anchor=S,padx=0,pady=0)
-        titleLB.grid(row=1,column=1)
-        listbox = Listbox(self.master, name="maListe")
-        listbox.bind("<Double-Button-1>", self.refreshClientDetails)
-        listbox.grid(row=2, column=1, rowspan=3, sticky=N + S)
-        for client in self.clientList:
-           # print(">1 " + client)
-            listbox.insert(END, client)
-
         #Avoid photo to be destroy by garbage collector
         self.listPhoto.append(photo)
         self.listPhoto.append(photo2)
@@ -116,6 +102,30 @@ class ClientSCreen:
         self.listPhoto.append(nP3)
         self.listPhoto.append(nP4)
 
+
+        aFakeLabel = Label(self.master, text="W" + str(1))
+        myFont = tkFont.Font(font=aFakeLabel['font'])
+        myFont.config(weight=tkFont.BOLD)
+
+
+        titleLB = Label(self.master,name="titleLB",text="Liste des clients",anchor=S,padx=0,pady=0,font=myFont)
+        titleLB.grid(row=1,column=1)
+        listbox = Listbox(self.master, name="maListe")
+        listbox.bind("<Double-Button-1>", self.refreshClientDetails)
+        listbox.grid(row=2, column=1, rowspan=3, sticky=N + S)
+        for client in self.clientList:
+           # print(">1 " + client)
+            listbox.insert(END, client)
+
+        ix=0
+        for client in listbox.get(0, END):            
+            if client == self.activeClient:
+                listbox.activate(ix)
+                listbox.select_set(ix)
+                break            
+            ix = ix + 1
+            
+            
         #Client details
         try :
             theRow=2
@@ -136,16 +146,25 @@ class ClientSCreen:
             clientMail = Label(self.master, name="clientMail", textvariable=self.textList[4], anchor=S, padx=0,
                                pady=0).grid(row=theRow, column=2, sticky=N + S)
 
+
+
+            #List des factures
+            ###################
             theRow = theRow + 1
-            titleLBfacture = Label(self.master,name="titleLB2",text="Factures Client",anchor=S,padx=0,pady=0)
+            titleLBfacture = Label(self.master,name="titleLB2",text="Factures Client",anchor=S,padx=0,pady=0,font=myFont)
             titleLBfacture.grid(row=theRow,column=2)
             theRow = theRow + 1
-            listboxFact = Listbox(self.master, name="maListeFac")
+
+            self.listFactures.clear
+            scrollbar = Scrollbar(self.master, orient=VERTICAL)
+
+            listboxFact = Listbox(self.master, name="maListeFac",listvariable=self.listFactures, yscrollcommand=scrollbar.set)
+            scrollbar.config(command=listboxFact.yview)
+            scrollbar.grid(row=theRow, column=3, sticky=N + S)
             listboxFact.grid(row=theRow, column=2, sticky=N + S)
-            pp.printGreen("currentClient="+self.activeClient)
             for aFact in self.clientList[self.activeClient].factureList:
                # print(">2 " + aFact.numberId)
-                listboxFact.insert(END, aFact.numberId+"-"+aFact.editionDate)
+               listboxFact.insert(END, aFact.numberId+"-"+aFact.editionDate)
 
         except Exception as e :
             pp.printError ("Unable to draw CLient details")
@@ -164,10 +183,6 @@ class ClientSCreen:
             self.clientList[test.client.name]=test.client
             theList=event.widget.master.nametowidget(".maListe")
             theList.insert(END, test.client.name)
-            # theList.delete(0, END)
-            # for client in self.clientList:
-            #     print(")>" + client)
-            #     theList.insert(END, client)
             self.config["clientsDB"][test.client.name]=""
         else :
             print ("Nothing return ... Do not refresh")
@@ -221,6 +236,12 @@ class ClientSCreen:
                 print (ix)
                 self.textList[index].set(ix)
                 index=index+1
+
+            listboxFact = event.widget.master.nametowidget(".maListeFac")
+            listboxFact.delete(0, END) 
+            for aFact in self.clientList[self.activeClient].factureList:
+               # print(">2 " + aFact.numberId)
+               listboxFact.insert(END, aFact.numberId+"-"+aFact.editionDate)
 
 
         except Exception as e :

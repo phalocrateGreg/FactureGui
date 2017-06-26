@@ -107,7 +107,7 @@ root.title("Mine")
 
 toplevel = root.winfo_toplevel()
 toplevel.protocol("WM_DELETE_WINDOW", saveBeforeDestroy)
-#toplevel.wm_state('zoomed')
+toplevel.wm_state('zoomed')
 
 #print ("maxX="+str(root.winfo_screenwidth())+" "+str(root.winfo_screenheight()))
 
@@ -139,9 +139,7 @@ try :
 
 
 
-    #Screen Clients
     myScreen = ClientSCreen(root, configFile, clientList)
-    #myScreen=CalendarScreen(root,configFile)
     myScreen.drawScreen()
     root.mainloop()
 
