@@ -127,6 +127,8 @@ class ClientSCreen:
             
             
         #Client details
+        titleClientDetails = Label(self.master,name="titleCD",text="Détails client",anchor=S,padx=0,pady=0,font=myFont)
+        titleClientDetails.grid(row=1,column=2)
         try :
             theRow=2
             clientName = Label(self.master,name="clientName",textvariable=self.textList[0], anchor=S, padx=0, pady=0).grid(row=theRow,column=2, sticky=N + S)
@@ -150,18 +152,18 @@ class ClientSCreen:
 
             #List des factures
             ###################
-            theRow = theRow + 1
+            #theRow = theRow + 1
             titleLBfacture = Label(self.master,name="titleLB2",text="Factures Client",anchor=S,padx=0,pady=0,font=myFont)
-            titleLBfacture.grid(row=theRow,column=2)
-            theRow = theRow + 1
+            titleLBfacture.grid(row=1,column=3)
+            #theRow = theRow + 1
 
             self.listFactures.clear
             scrollbar = Scrollbar(self.master, orient=VERTICAL)
 
             listboxFact = Listbox(self.master, name="maListeFac",listvariable=self.listFactures, yscrollcommand=scrollbar.set)
             scrollbar.config(command=listboxFact.yview)
-            scrollbar.grid(row=theRow, column=3, sticky=N + S)
-            listboxFact.grid(row=theRow, column=2, sticky=N + S)
+            scrollbar.grid(row=2, column=4, sticky=N + S)
+            listboxFact.grid(row=2, column=3, sticky=N + S)
             for aFact in self.clientList[self.activeClient].factureList:
                # print(">2 " + aFact.numberId)
                listboxFact.insert(END, aFact.numberId+"-"+aFact.editionDate)

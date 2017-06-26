@@ -27,26 +27,40 @@ class GenerationScreen:
 
 
     def drawScreen(self):
-        group = LabelFrame(self.master, padx=5, pady=5)
-        group.grid(row=1,column=0)
+        # Toolbar
+        rowIndex =  1
+        photo1 = PhotoImage(file="Ressources/30143-xsara54-Parametres.gif")
+        nP1 = photo1.subsample(4, 4)
+        w1 = Label(self.master, image=nP1, text="Générer facture", compound="top")
+        w1.bind("<Button-1>", self.callbackGen)
+        w1.photo = photo1
+        w1.grid(row=rowIndex, padx=20)
+        rowIndex = rowIndex + 1
+
+
+        photo2 = PhotoImage(file="Ressources/tickAction.gif")
+        nP2 = photo2.subsample(4, 4)
+        w2 = Label(self.master, image=nP2, text="(dé)selectioner tous", compound="top")
+        w2.bind("<Button-1>", self.switchAll)
+        w2.photo = photo2
+        w2.grid(row=rowIndex, padx=20)
+    
+        #Avoid photo to be destroy by garbage collector
+        self.listPhoto.append(nP1)
+        self.listPhoto.append(nP2)
         
         aFakeLabel = Label(self.master, text="W" + str(1))
         myFont = tkFont.Font(font=aFakeLabel['font'])
         myFont.config(weight=tkFont.BOLD)
 
-        titleLateFact = Label(self.master, name="titleLateFAct", text="Liste des clients", anchor=S, padx=50, pady=0,font=myFont).grid(row=1,column=1)
-        titleLateFact2 = Label(self.master, name="titleTickBox", text="Generation des factures", anchor=S, padx=50, pady=0,font=myFont).grid(row=1,column=2)
-        b = Button(self.master, text="(de)selectioner tous", command=self.switchAll).grid(row=1,column=3)
-        listCLient = []
-        listVar = []
-
-
+        titleClientList = Label(self.master, name="titleClientList", text="Liste des clients", anchor=S, padx=50, pady=0,font=myFont).grid(row=1,column=1)
+        titleTickBox = Label(self.master, name="titleTickBox", text="Generation des factures", anchor=S, padx=50, pady=0,font=myFont).grid(row=1,column=2)
+       
         rowIndex = 1
         for ix in self.clientList:
             pp.printGreen(ix)
             self.clientListVar[ix] = IntVar(0)
             label = Label(self.master, name="client_"+str(ix), text = self.clientList[ix].name).grid(row = rowIndex+1,column = 1)
-
             c = Checkbutton(
                 self.master, name="clientCheckbox_"+str(ix),
                 text="",
@@ -61,19 +75,10 @@ class GenerationScreen:
         self.progresBar.grid(row=rowIndex+1,column = 1)
         self.progresBar.grid_remove()
 
-        photo3 = PhotoImage(file="Ressources/30143-xsara54-Parametres.gif")
-        nP3 = photo3.subsample(4, 4)
-        w3 = Label(self.master, image=nP3, text="Générer les factures", compound="top")
-        w3.bind("<Button-1>", self.callbackGen)
-        w3.grid(row = rowIndex+1,column = 2)
-        rowIndex = rowIndex +1
-
-        #Avoid photo to be destroy by garbage collector
-        self.listPhoto.append(photo3)
-        self.listPhoto.append(nP3)
 
 
-    def switchAll(self):
+
+    def switchAll(self,event):
         for widget in self.listCheckBox:
             if  self.shouldActivateAll :
                 widget.select()
