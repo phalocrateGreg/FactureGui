@@ -28,9 +28,8 @@ class ClientSCreen:
 
         for widget in master.grid_slaves():
             #Don't touch the menu bar !
-            if widget.widgetName !="frame":
+            if widget.widgetName !="frame" :
                 widget.destroy()
-
         for ix in range (0,7) :
             self.textList.append(StringVar())
 
@@ -108,13 +107,16 @@ class ClientSCreen:
         myFont.config(weight=tkFont.BOLD)
 
 
-        titleLB = Label(self.master,name="titleLB",text="Liste des clients",anchor=S,padx=0,pady=0,font=myFont)
+        
+        placeHolder = Frame(self.master, name="placeHolder", bd=1, relief=SUNKEN,bg="white")
+        placeHolder.grid(row=1,column=1,rowspan=5,columnspan=5, sticky=N)
+
+        titleLB = Label(placeHolder,name="titleLB",text="Liste des clients",anchor=S,padx=0,pady=0,font=myFont)
         titleLB.grid(row=1,column=1)
-        listbox = Listbox(self.master, name="maListe")
+        listbox = Listbox(placeHolder, name="maListe")
         listbox.bind("<Double-Button-1>", self.refreshClientDetails)
-        listbox.grid(row=2, column=1, rowspan=3, sticky=N + S)
+        listbox.grid(row=2, column=1, rowspan=5, sticky=N + S)
         for client in self.clientList:
-           # print(">1 " + client)
             listbox.insert(END, client)
 
         ix=0
@@ -127,43 +129,42 @@ class ClientSCreen:
             
             
         #Client details
-        titleClientDetails = Label(self.master,name="titleCD",text="Détails client",anchor=S,padx=0,pady=0,font=myFont)
+        titleClientDetails = Label(placeHolder,name="titleCD",text="Détails client",anchor=S,padx=0,pady=0,font=myFont)
         titleClientDetails.grid(row=1,column=2)
         try :
             theRow=2
-            clientName = Label(self.master,name="clientName",textvariable=self.textList[0], anchor=S, padx=0, pady=0).grid(row=theRow,column=2, sticky=N + S)
+            clientName = Label(placeHolder,name="clientName",textvariable=self.textList[0]).grid(row=theRow,column=2, sticky=N )
             theRow=theRow+1
-            clientAdress = Label(self.master,name="clientAdress",textvariable=self.textList[1], anchor=S, padx=0, pady=0).grid(row=theRow,column=2, sticky=N + S)
+            clientAdress = Label(placeHolder,name="clientAdress",textvariable=self.textList[1]).grid(row=theRow,column=2, sticky=N )
 
             theRow = theRow + 1
-            clientZip=Label(self.master,name="clientZip",textvariable=self.textList[3], anchor=S, padx=0, pady=0).grid(row=theRow,column=2, sticky=N + S)
+            clientZip=Label(placeHolder,name="clientZip",textvariable=self.textList[3]).grid(row=theRow,column=2, sticky=N)
 
             theRow = theRow + 1
-            clientCity = Label(self.master, name="clientCity", textvariable=self.textList[2], anchor=S, padx=0,pady=0).grid(row=theRow, column=2, sticky=N + S)
+            clientCity = Label(placeHolder, name="clientCity", textvariable=self.textList[2], anchor=S, padx=0,pady=0).grid(row=theRow, column=2, sticky=N )
 
             theRow = theRow + 1
-            clientType =  Label(self.master,name="clientType",textvariable=self.textList[6], anchor=S, padx=0, pady=0).grid(row=theRow,column=2, sticky=N + S)
+            clientType =  Label(placeHolder,name="clientType",textvariable=self.textList[6]).grid(row=theRow,column=2, sticky=N )
 
             theRow = theRow + 1
-            clientMail = Label(self.master, name="clientMail", textvariable=self.textList[4], anchor=S, padx=0,
-                               pady=0).grid(row=theRow, column=2, sticky=N + S)
+            clientMail = Label(placeHolder, name="clientMail", textvariable=self.textList[4]).grid(row=theRow, column=2, sticky=N )
 
 
 
             #List des factures
             ###################
             #theRow = theRow + 1
-            titleLBfacture = Label(self.master,name="titleLB2",text="Factures Client",anchor=S,padx=0,pady=0,font=myFont)
+            titleLBfacture = Label(placeHolder,name="titleLB2",text="Factures Client",anchor=S,padx=0,pady=0,font=myFont)
             titleLBfacture.grid(row=1,column=3)
             #theRow = theRow + 1
 
             self.listFactures.clear
-            scrollbar = Scrollbar(self.master, orient=VERTICAL)
+            scrollbar = Scrollbar(placeHolder, orient=VERTICAL)
 
-            listboxFact = Listbox(self.master, name="maListeFac",listvariable=self.listFactures, yscrollcommand=scrollbar.set)
+            listboxFact = Listbox(placeHolder, name="maListeFac",listvariable=self.listFactures, yscrollcommand=scrollbar.set)
             scrollbar.config(command=listboxFact.yview)
-            scrollbar.grid(row=2, column=4, sticky=N + S)
-            listboxFact.grid(row=2, column=3, sticky=N + S)
+            scrollbar.grid(row=2, column=4, sticky=N + S,rowspan=5)
+            listboxFact.grid(row=2, column=3, sticky=N + S,rowspan=5)
             for aFact in self.clientList[self.activeClient].factureList:
                # print(">2 " + aFact.numberId)
                listboxFact.insert(END, aFact.numberId+"-"+aFact.editionDate)
@@ -183,7 +184,7 @@ class ClientSCreen:
 
             print ("refresssssssssssssssssssssh")
             self.clientList[test.client.name]=test.client
-            theList=event.widget.master.nametowidget(".maListe")
+            theList=event.widget.master.nametowidget(".placeHolder.maListe")
             theList.insert(END, test.client.name)
             self.config["clientsDB"][test.client.name]=""
         else :
@@ -191,7 +192,7 @@ class ClientSCreen:
 
 
     def callbackRm (self,event) :
-        theList =event.widget.master.nametowidget(".maListe")
+        theList =event.widget.master.nametowidget(".placeHolder.maListe")
         print ("Item to rm=>"+theList.get(ACTIVE))
 
         #Now remove the items
@@ -208,16 +209,16 @@ class ClientSCreen:
 
     def callbackEdit(self,event):
         #Not elegant way to transmit client info to class MyDialog
-        event.widget.client=self.clientList[event.widget.master.nametowidget(".maListe").get(ACTIVE)]
-        oldClientName=self.clientList[event.widget.master.nametowidget(".maListe").get(ACTIVE)].name
+        event.widget.client=self.clientList[event.widget.master.nametowidget(".placeHolder.maListe").get(ACTIVE)]
+        oldClientName=self.clientList[event.widget.master.nametowidget(".placeHolder.maListe").get(ACTIVE)].name
         global theSelectedClient
-        theSelectedClient = self.clientList[event.widget.master.nametowidget(".maListe").get(ACTIVE)]
+        theSelectedClient = self.clientList[event.widget.master.nametowidget(".placeHolder.maListe").get(ACTIVE)]
 
         test = MyDialog(event.widget)
         if test.client is not None:
             del self.clientList[oldClientName]
             self.clientList[test.client.name] = test.client
-            theList = event.widget.master.nametowidget(".maListe")
+            theList = event.widget.master.nametowidget(".placeHolder.maListe")
             theList.insert(END, test.client.name)
             theList.delete(0, END)
             for client in self.clientList:
@@ -229,17 +230,17 @@ class ClientSCreen:
 
     def refreshClientDetails(self,event):
         try :
-            theList = self.master.nametowidget(".maListe")
+            theList= self.master.nametowidget(".placeHolder.maListe")
             theListInfo=self.clientList[theList.get(ACTIVE)].toList()
             global theSelectedClient
-            self.activeClient=event.widget.master.nametowidget(".maListe").get(ACTIVE)
+            self.activeClient=theList.get(ACTIVE)
             index=0
             for ix in theListInfo:
                 print (ix)
                 self.textList[index].set(ix)
                 index=index+1
 
-            listboxFact = event.widget.master.nametowidget(".maListeFac")
+            listboxFact = event.widget.master.nametowidget(".placeHolder.maListeFac")
             listboxFact.delete(0, END) 
             for aFact in self.clientList[self.activeClient].factureList:
                # print(">2 " + aFact.numberId)
@@ -252,7 +253,7 @@ class ClientSCreen:
             pp.printError(traceback.format_exc())
             
     def callbackGen(self,event):
-            theClient=event.widget.master.nametowidget(".maListe").get(ACTIVE)
+            theClient=event.widget.master.nametowidget(".placeHolder.maListe").get(ACTIVE)
             print("Generating the doc ")
             event.widget.master.config(cursor="watch")
 

@@ -24,7 +24,7 @@ class GenerationScreen:
             #Don't touch the menu bar !
             if widget.widgetName !="frame":
                 widget.destroy()
-
+        self.master.nametowidget(".placeHolder").destroy()
 
     def drawScreen(self):
         # Toolbar

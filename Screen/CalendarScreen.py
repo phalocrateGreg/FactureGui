@@ -22,7 +22,7 @@ class CalendarScreen:
             #Don't touch the menu bar !
             if widget.widgetName !="frame":
                 widget.destroy()
-
+        self.master.nametowidget(".placeHolder").destroy()
     def buildListOfDueDate (self) :
         today=datetime.now()
         todayDate = today.date()
