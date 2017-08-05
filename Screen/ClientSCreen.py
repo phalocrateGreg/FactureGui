@@ -118,7 +118,8 @@ class ClientSCreen:
         listbox.grid(row=2, column=1, rowspan=5, sticky=N + S)
         for client in self.clientList:
             listbox.insert(END, client)
-
+            
+        #activate the first element of the list
         ix=0
         for client in listbox.get(0, END):            
             if client == self.activeClient:
@@ -129,6 +130,7 @@ class ClientSCreen:
             
             
         #Client details
+
         titleClientDetails = Label(placeHolder,name="titleCD",text="Détails client",anchor=S,padx=0,pady=0,font=myFont)
         titleClientDetails.grid(row=1,column=2)
         try :
@@ -151,23 +153,50 @@ class ClientSCreen:
 
 
 
+
+
+
+
+
+
+            theRow = theRow + 1
             #List des factures
             ###################
             #theRow = theRow + 1
             titleLBfacture = Label(placeHolder,name="titleLB2",text="Factures Client",anchor=S,padx=0,pady=0,font=myFont)
-            titleLBfacture.grid(row=1,column=3)
+            titleLBfacture.grid(row=theRow,column=1)
             #theRow = theRow + 1
+
+            #Facture details
+            ###################
+            
+            titleLBfactureDetails = Label(placeHolder,name="titleFacDetails",text="Détails facture",anchor=S,padx=0,pady=0,font=myFont)
+            titleLBfactureDetails.bind("<Double-Button-1>", self.refreshFactureDetails)
+            titleLBfactureDetails.grid(row=theRow,column=2,columnspan=2)
+
+            theRow = theRow + 1
+            listboxFactDetailsName = Listbox(placeHolder)            
+            listboxFactDetailsName.insert(END, "N°")
+            listboxFactDetailsName.insert(END, "Fait le")
+            listboxFactDetailsName.insert(END, "Échéance")
+            listboxFactDetailsName.insert(END, "Montant")
+            listboxFactDetailsName.grid(row=theRow, column=3, sticky=N + S,rowspan=5)
+            theRow = theRow + 1
+            listboxFactDetails = Listbox(placeHolder, name="maListeFacDetails")
+            listboxFactDetails.grid(row=theRow, column=4, sticky=N + S,rowspan=5)
 
             self.listFactures.clear
             scrollbar = Scrollbar(placeHolder, orient=VERTICAL)
 
             listboxFact = Listbox(placeHolder, name="maListeFac",listvariable=self.listFactures, yscrollcommand=scrollbar.set)
+            listboxFact.bind("<Double-Button-1>", self.refreshFactureDetails)
             scrollbar.config(command=listboxFact.yview)
-            scrollbar.grid(row=2, column=4, sticky=N + S,rowspan=5)
-            listboxFact.grid(row=2, column=3, sticky=N + S,rowspan=5)
+            scrollbar.grid(row=theRow, column=2, sticky=N + S,rowspan=5)
+            listboxFact.grid(row=theRow, column=1, sticky=N + S,rowspan=5)
             for aFact in self.clientList[self.activeClient].factureList:
                # print(">2 " + aFact.numberId)
                listboxFact.insert(END, aFact.numberId+"-"+aFact.editionDate)
+            
 
         except Exception as e :
             pp.printError ("Unable to draw CLient details")
@@ -180,9 +209,6 @@ class ClientSCreen:
         test = MyDialog(event.widget)
 
         if test.client is not None :
-            print (test.client.name)
-
-            print ("refresssssssssssssssssssssh")
             self.clientList[test.client.name]=test.client
             theList=event.widget.master.nametowidget(".placeHolder.maListe")
             theList.insert(END, test.client.name)
@@ -226,6 +252,20 @@ class ClientSCreen:
                  theList.insert(END, client)
         else:
             print("Nothing return ... Do not refresh")
+
+    def refreshFactureDetails(self,event):
+        pp.printGreen("Refresh facture details")
+        activeFacture=event.widget.get(ACTIVE)
+
+        theList= self.master.nametowidget(".placeHolder.maListeFacDetails")
+        for aFact in self.clientList[self.activeClient].factureList:
+            if str(aFact.numberId+"-"+aFact.editionDate) == activeFacture:
+                theList.delete(0,END)
+                theList.insert(END, aFact.numberId)
+                theList.insert(END, aFact.editionDate)
+                theList.insert(END, aFact.dueDate)
+                theList.insert(END, aFact.amount)
+                break
 
 
     def refreshClientDetails(self,event):
