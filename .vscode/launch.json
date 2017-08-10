@@ -1,0 +1,26 @@
+ {
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Watson",
+            "type": "python",
+            "request": "launch",
+            "stopOnEntry": false,
+            "program": "${workspaceRoot}/main.py",
+            "pythonPath": "C:/Users/Greg/AppData/Local/Programs/Python/Python35-32/python.exe",
+            "exceptionHandling": {
+                "ignore": ["ImportError"]
+            },
+            "args": [
+                "dev",
+                "runserver",
+                "--noreload=True"
+            ],
+            "debugOptions": [
+                "WaitOnAbnormalExit",
+                "WaitOnNormalExit",
+                "RedirectOutput"
+            ]
+        }
+    ]
+}
