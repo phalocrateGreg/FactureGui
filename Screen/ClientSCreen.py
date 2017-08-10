@@ -151,52 +151,45 @@ class ClientSCreen:
             theRow = theRow + 1
             clientMail = Label(placeHolder, name="clientMail", textvariable=self.textList[4]).grid(row=theRow, column=2, sticky=N )
 
-
-
-
-
-
-
-
-
             theRow = theRow + 1
             #List des factures
             ###################
-            #theRow = theRow + 1
             titleLBfacture = Label(placeHolder,name="titleLB2",text="Factures Client",anchor=S,padx=0,pady=0,font=myFont)
-            titleLBfacture.grid(row=theRow,column=1)
-            #theRow = theRow + 1
-
+            titleLBfacture.grid(row=theRow,column=1,columnspan=2)
             #Facture details
             ###################
-            
             titleLBfactureDetails = Label(placeHolder,name="titleFacDetails",text="Détails facture",anchor=S,padx=0,pady=0,font=myFont)
             titleLBfactureDetails.bind("<Double-Button-1>", self.refreshFactureDetails)
             titleLBfactureDetails.grid(row=theRow,column=2,columnspan=2)
 
             theRow = theRow + 1
-            listboxFactDetailsName = Listbox(placeHolder)            
-            listboxFactDetailsName.insert(END, "N°")
-            listboxFactDetailsName.insert(END, "Fait le")
-            listboxFactDetailsName.insert(END, "Échéance")
-            listboxFactDetailsName.insert(END, "Montant")
-            listboxFactDetailsName.grid(row=theRow, column=3, sticky=N + S,rowspan=5)
-            theRow = theRow + 1
-            listboxFactDetails = Listbox(placeHolder, name="maListeFacDetails")
-            listboxFactDetails.grid(row=theRow, column=4, sticky=N + S,rowspan=5)
 
             self.listFactures.clear
             scrollbar = Scrollbar(placeHolder, orient=VERTICAL)
 
             listboxFact = Listbox(placeHolder, name="maListeFac",listvariable=self.listFactures, yscrollcommand=scrollbar.set)
             listboxFact.bind("<Double-Button-1>", self.refreshFactureDetails)
+            listboxFact.grid(row=theRow, column=1, sticky=N + S,rowspan=5)
+
             scrollbar.config(command=listboxFact.yview)
             scrollbar.grid(row=theRow, column=2, sticky=N + S,rowspan=5)
-            listboxFact.grid(row=theRow, column=1, sticky=N + S,rowspan=5)
+            
             for aFact in self.clientList[self.activeClient].factureList:
-               # print(">2 " + aFact.numberId)
                listboxFact.insert(END, aFact.numberId+"-"+aFact.editionDate)
             
+
+            listboxFactDetailsName = Listbox(placeHolder)            
+            listboxFactDetailsName.insert(END, "N°")
+            listboxFactDetailsName.insert(END, "Fait le")
+            listboxFactDetailsName.insert(END, "Échéance")
+            listboxFactDetailsName.insert(END, "Montant")
+            listboxFactDetailsName.insert(END, "Payé")
+            listboxFactDetailsName.grid(row=theRow, column=3, sticky=N + S,rowspan=5)
+            theRow = theRow + 1
+            listboxFactDetails = Listbox(placeHolder, name="maListeFacDetails")
+            listboxFactDetails.grid(row=theRow, column=4, sticky=N + S,rowspan=5)
+
+           
 
         except Exception as e :
             pp.printError ("Unable to draw CLient details")
@@ -265,6 +258,10 @@ class ClientSCreen:
                 theList.insert(END, aFact.editionDate)
                 theList.insert(END, aFact.dueDate)
                 theList.insert(END, aFact.amount)
+                if aFact.isPaid:
+                    theList.insert(END,"V")
+                else :
+                    theList.insert(END,"X")
                 break
 
 

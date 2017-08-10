@@ -22,7 +22,10 @@ class CalendarScreen:
             #Don't touch the menu bar !
             if widget.widgetName !="frame":
                 widget.destroy()
-        self.master.nametowidget(".placeHolder").destroy()
+        try :
+            self.master.nametowidget(".placeHolder").destroy()
+        except Exception:
+            pp.printWarning("Unable to delete placeholder ")
     def buildListOfDueDate (self) :
         today=datetime.now()
         todayDate = today.date()
@@ -31,7 +34,7 @@ class CalendarScreen:
                 aDueDate=aFact.dueDate
                 aDate=datetime.strptime(aDueDate, '%Y-%m-%d')
                 if aDate.date() < todayDate:
-                    pp.printWarning("A facture is late ! >>>>>>>>>"+aDueDate)
+                    #pp.printWarning("A facture is late ! >>>>>>>>>"+aDueDate)
                     if aDueDate in self.listOfLateFact:                    
                         self.listOfLateFact[aDueDate]=    self.listOfLateFact[aDueDate]+";"+aClient
                     else :
