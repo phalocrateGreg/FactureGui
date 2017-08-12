@@ -3,7 +3,7 @@ from datetime import datetime, date, time,timedelta
 
 class Facture:
 
-     def __init__(self,numberId,clientName,editionDate=None,dueDate=None,amount=0):
+     def __init__(self,numberId,clientName,editionDate=None,dueDate=None,amount=0,isPaid=False):
         self.numberId=numberId
         self.clientName = clientName
         if editionDate is None :
@@ -17,6 +17,7 @@ class Facture:
             self.dueDate= dueDate
 
         self.amount=amount
+        self.isPaid=False
 
      def toString(self):
          print ("Facture :"+str(self.numberId))
@@ -24,6 +25,7 @@ class Facture:
          print (self.editionDate)
          print (self.dueDate)
          print(self.amount)
+         print(self.isPaid)
 
 
 

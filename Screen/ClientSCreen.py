@@ -132,24 +132,24 @@ class ClientSCreen:
         #Client details
 
         titleClientDetails = Label(placeHolder,name="titleCD",text="Détails client",anchor=S,padx=0,pady=0,font=myFont)
-        titleClientDetails.grid(row=1,column=2)
+        titleClientDetails.grid(row=1,column=2,columnspan=2)
         try :
             theRow=2
-            clientName = Label(placeHolder,name="clientName",textvariable=self.textList[0]).grid(row=theRow,column=2, sticky=N )
+            clientName = Label(placeHolder,name="clientName",textvariable=self.textList[0]).grid(row=theRow,column=2, sticky=N,columnspan=2 )
             theRow=theRow+1
-            clientAdress = Label(placeHolder,name="clientAdress",textvariable=self.textList[1]).grid(row=theRow,column=2, sticky=N )
+            clientAdress = Label(placeHolder,name="clientAdress",textvariable=self.textList[1]).grid(row=theRow,column=2, sticky=N ,columnspan=2)
 
             theRow = theRow + 1
-            clientZip=Label(placeHolder,name="clientZip",textvariable=self.textList[3]).grid(row=theRow,column=2, sticky=N)
+            clientZip=Label(placeHolder,name="clientZip",textvariable=self.textList[3]).grid(row=theRow,column=2, sticky=N,columnspan=2)
 
             theRow = theRow + 1
-            clientCity = Label(placeHolder, name="clientCity", textvariable=self.textList[2], anchor=S, padx=0,pady=0).grid(row=theRow, column=2, sticky=N )
+            clientCity = Label(placeHolder, name="clientCity", textvariable=self.textList[2], anchor=S, padx=0,pady=0).grid(row=theRow, column=2, sticky=N,columnspan=2 )
 
             theRow = theRow + 1
-            clientType =  Label(placeHolder,name="clientType",textvariable=self.textList[6]).grid(row=theRow,column=2, sticky=N )
+            clientType =  Label(placeHolder,name="clientType",textvariable=self.textList[6]).grid(row=theRow,column=2, sticky=N,columnspan=2 )
 
             theRow = theRow + 1
-            clientMail = Label(placeHolder, name="clientMail", textvariable=self.textList[4]).grid(row=theRow, column=2, sticky=N )
+            clientMail = Label(placeHolder, name="clientMail", textvariable=self.textList[4]).grid(row=theRow, column=2, sticky=N ,columnspan=2)
 
             theRow = theRow + 1
             #List des factures
