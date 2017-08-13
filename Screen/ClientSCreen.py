@@ -40,11 +40,6 @@ class ClientSCreen:
             theInfo=self.clientList[theFirstClient].toList()
             for ix in range (0,len(theInfo)-1):
                 self.textList[ix].set(theInfo[ix])
-            
-            index =0
-           # for ix in self.clientList[theFirstClient].factureList:
-           #     self.listFactures[index].append(StringVar(ix))
-           #     index=index+1
         except Exception as e:
             pp.printError ("Unbale to init the field")
             pp.printError(traceback.format_exc())

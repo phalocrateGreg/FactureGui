@@ -56,16 +56,19 @@ class GenerationScreen:
         myFont = tkFont.Font(font=aFakeLabel['font'])
         myFont.config(weight=tkFont.BOLD)
 
-        titleClientList = Label(self.master, name="titleClientList", text="Liste des clients", anchor=S, padx=50, pady=0,font=myFont).grid(row=1,column=1)
-        titleTickBox = Label(self.master, name="titleTickBox", text="Generation des factures", anchor=S, padx=50, pady=0,font=myFont).grid(row=1,column=2)
+        placeHolder = Frame(self.master, name="placeHolder", bd=1, relief=SUNKEN,bg="white")
+        placeHolder.grid(row=1,column=1,rowspan=5,columnspan=5, sticky=N)
+
+        titleClientList = Label(placeHolder, name="titleClientList", text="Liste des clients", anchor=S, padx=50, pady=0,font=myFont).grid(row=1,column=1)
+        titleTickBox = Label(placeHolder, name="titleTickBox", text="Generation des factures", anchor=S, padx=50, pady=0,font=myFont).grid(row=1,column=2)
        
         rowIndex = 1
         for ix in self.clientList:
             pp.printGreen(ix)
             self.clientListVar[ix] = IntVar(0)
-            label = Label(self.master, name="client_"+str(ix), text = self.clientList[ix].name).grid(row = rowIndex+1,column = 1)
+            label = Label(placeHolder, name="client_"+str(ix), text = self.clientList[ix].name).grid(row = rowIndex+1,column = 1)
             c = Checkbutton(
-                self.master, name="clientCheckbox_"+str(ix),
+                placeHolder, name="clientCheckbox_"+str(ix),
                 text="",
                 variable=self.clientListVar[ix])
             c.select()
@@ -113,11 +116,6 @@ class GenerationScreen:
                         isError = True                        
                         continue
 
-                    #for aFac in self.clientList[aClient].factureList:
-                    #    print (aFac.toString())
-                    # pp.printGreen("Generating the doc : OK!")
-                    
-                    #messagebox.showinfo("Info","Facture créé avec succés (en "+str(gentime)+")")
                     self.clientList[aClient].toConfig(True)
                     self.progressGen.set(self.progressGen.get()+1)
                 else :

@@ -26,6 +26,7 @@ class CalendarScreen:
             self.master.nametowidget(".placeHolder").destroy()
         except Exception:
             pp.printWarning("Unable to delete placeholder ")
+
     def buildListOfDueDate (self) :
         today=datetime.now()
         todayDate = today.date()
@@ -63,9 +64,12 @@ class CalendarScreen:
             self.detaislLabel.set(theKey)
 
     def drawCalendar(self,master):
+
         aFakeLabel = Label(master, text="W" + str(1))
         myFont = tkFont.Font(font=aFakeLabel['font'])
         myFont.config(weight=tkFont.BOLD)
+        
+
 
         day_list = ["Er", "Lu", "Ma", "Me", "Je", "Ve", "Sa", "Di"]
         today=datetime.now()
@@ -127,23 +131,27 @@ class CalendarScreen:
 
 
     def drawScreen (self) :
-        group = LabelFrame(self.master, padx=5, pady=5)
+
+        placeHolder = Frame(self.master, name="placeHolder", bd=1, relief=SUNKEN,bg="white")
+        placeHolder.grid(row=1,column=1,rowspan=5,columnspan=5, sticky=N)
+        group = LabelFrame(placeHolder, padx=5, pady=5)
         group.grid(row=1,column=0)
+
         self.drawCalendar(group)
-        aFakeLabel = Label(self.master, text="W" + str(1))
+        aFakeLabel = Label(placeHolder, text="W" + str(1))
         myFont = tkFont.Font(font=aFakeLabel['font'])
         myFont.config(weight=tkFont.BOLD)
 
-        titleLateFact = Label(self.master, name="titleLateFAct", text="Factures en retard", anchor=S, padx=50, pady=0,font=myFont).grid(row=1,column=1)
+        titleLateFact = Label(placeHolder, name="titleLateFAct", text="Factures en retard", anchor=S, padx=50, pady=0,font=myFont).grid(row=1,column=1)
         ix=1
         for jx in self.listOfLateFact:
-            aLabel =Label(self.master, text="Les factures auraient dû être payée le  "+str(jx)+" pour "+str(self.listOfLateFact[jx])).grid(row=ix+1,column=1)
+            aLabel =Label(placeHolder, text="Les factures auraient dû être payée le  "+str(jx)+" pour "+str(self.listOfLateFact[jx])).grid(row=ix+1,column=1)
             ix=ix+1
         
-        titleLB = Label(self.master, name="titleLB", text="Prochaine échéance", anchor=S, padx=50, pady=0,font=myFont).grid(row=ix+1,column=1)
+        titleLB = Label(placeHolder, name="titleLB", text="Prochaine échéance", anchor=S, padx=50, pady=0,font=myFont).grid(row=ix+1,column=1)
         #for kx in range (2,10):
-        #    aLabel =Label(self.master, text="echéance "+str(ix)).grid(row=ix+1,column=1)
+        #    aLabel =Label(placeHolder, text="echéance "+str(ix)).grid(row=ix+1,column=1)
 
         ix=ix+1
-        titleLB2 = Label(self.master, name="titleLB2", text="Détails", anchor=S, padx=50, pady=0,font=myFont).grid(row=ix,column=1)
-        theDetailsLabel =Label(self.master, name="theDetailsLabel", textvariable=self.detaislLabel, text=" "+str(ix)).grid(row=ix+1,column=1)
+        titleLB2 = Label(placeHolder, name="titleLB2", text="Détails", anchor=S, padx=50, pady=0,font=myFont).grid(row=ix,column=1)
+        theDetailsLabel =Label(placeHolder, name="theDetailsLabel", textvariable=self.detaislLabel, text=" "+str(ix)).grid(row=ix+1,column=1)
