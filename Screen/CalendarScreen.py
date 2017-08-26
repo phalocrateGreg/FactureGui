@@ -159,11 +159,11 @@ class CalendarScreen:
         scrollbarDates.grid(row=ix+1, column=2, sticky=N + S,)
         for jx in self.listOfLateFact:
             listboxDates.insert(END, jx)
-        theFirstDate=str(list(self.listOfLateFact.keys())[0])
+        self.activeDate=str(list(self.listOfLateFact.keys())[0])
         #activate the first element of the list
         ixItem=0
         for aDate in listboxDates.get(0, END):            
-            if aDate == theFirstDate:
+            if aDate == self.activeDate:
                 listboxDates.activate(ixItem)
                 listboxDates.select_set(ixItem)
                 break            
@@ -176,7 +176,7 @@ class CalendarScreen:
         scrollbarFacs.config(command=listboxFacs.yview)
         scrollbarFacs.grid(row=ix+1, column=4, sticky=N + S)
 
-        for jx in self.listOfLateFact[theFirstDate].split(";"):
+        for jx in self.listOfLateFact[self.activeDate].split(";"):
             listboxFacs.insert(END, jx)
         ix=ix+1
         aLabelDetailsFac = Label(placeHolder, text="Details de la facture:",font=myFont).grid(row=ix+1,column=0)
