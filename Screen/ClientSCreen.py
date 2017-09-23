@@ -24,6 +24,7 @@ class ClientSCreen:
         self.textList = []
         self.listPhoto = []
         self.activeClient = ""
+        self.activeFacture = ""
         self.listFactures = []
 
         for widget in master.grid_slaves():
@@ -85,16 +86,24 @@ class ClientSCreen:
         w3.bind("<Button-1>", self.callbackGen)
         w3.photo = photo2
         w3.grid(row=rowIndex, padx=20)
-
+        rowIndex = rowIndex + 1
+        photo5 = PhotoImage(file="Ressources/tickAction.gif")
+        nP5 = photo5.subsample(4, 4)
+        w5 = Label(self.master, image=nP5, text="Payé", compound="top")
+        w5.bind("<Button-1>", self.switchPaidStatus)
+        w5.photo = photo4
+        w5.grid(row=rowIndex, padx=20)
         #Avoid photo to be destroy by garbage collector
         self.listPhoto.append(photo)
         self.listPhoto.append(photo2)
         self.listPhoto.append(photo3)
         self.listPhoto.append(photo4)
+        self.listPhoto.append(photo5)
         self.listPhoto.append(nP)
         self.listPhoto.append(nP2)
         self.listPhoto.append(nP3)
         self.listPhoto.append(nP4)
+        self.listPhoto.append(nP5)
 
 
         aFakeLabel = Label(self.master, text="W" + str(1))
@@ -193,6 +202,17 @@ class ClientSCreen:
 
         return self.listPhoto
 
+    def switchPaidStatus(self,event):
+        print("Switch paid status")
+        theClient=event.widget.master.nametowidget(".placeHolder.maListe").get(ACTIVE)
+        print ( "theClient="+theClient)
+        print( "selectedFact"+self.activeFacture)
+        for facture in self.clientList[theClient].factureList:
+            if str(facture.numberId+"-"+facture.editionDate) == self.activeFacture:
+                facture.isPaid = not facture.isPaid
+                self.refreshFactureDetails(None)
+                print (" Facture updated")
+
     def callbackAdd (self,event) :
         test = MyDialog(event.widget)
 
@@ -243,11 +263,11 @@ class ClientSCreen:
 
     def refreshFactureDetails(self,event):
         pp.printGreen("Refresh facture details")
-        activeFacture=event.widget.get(ACTIVE)
-
+        if event :
+            self.activeFacture=event.widget.get(ACTIVE)
         theList= self.master.nametowidget(".placeHolder.maListeFacDetails")
         for aFact in self.clientList[self.activeClient].factureList:
-            if str(aFact.numberId+"-"+aFact.editionDate) == activeFacture:
+            if str(aFact.numberId+"-"+aFact.editionDate) == self.activeFacture:
                 theList.delete(0,END)
                 theList.insert(END, aFact.numberId)
                 theList.insert(END, aFact.editionDate)
@@ -272,7 +292,7 @@ class ClientSCreen:
                 self.textList[index].set(ix)
                 index=index+1
 
-            listboxFact = event.widget.master.nametowidget(".placeHolder.maListeFac")
+            listboxFact = self.master.nametowidget(".placeHolder.maListeFac")
             listboxFact.delete(0, END) 
             for aFact in self.clientList[self.activeClient].factureList:
                # print(">2 " + aFact.numberId)

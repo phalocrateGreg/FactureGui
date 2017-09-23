@@ -16,8 +16,8 @@ class Facture:
         else :
             self.dueDate= dueDate
 
-        self.amount=amount
-        self.isPaid=False
+        self.amount = amount
+        self.isPaid =  isPaid == 'True'
 
      def toString(self):
          print ("Facture :"+str(self.numberId))
