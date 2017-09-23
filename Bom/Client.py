@@ -44,7 +44,7 @@ class Client:
                                     self.config[section]["amount"],\
                                     self.config[section]["paid"])
                     self.factureList.append(aNewFacture)
-        #    self.factureList= self.factureList.sort(key = lambda fac:fac.dueDate)
+            self.factureList.sort(key = lambda fac:fac.editionDate)
             self.lastFactureId=int(section)
             pp.printGreen("Done")
         except :
