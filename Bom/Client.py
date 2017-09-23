@@ -38,9 +38,13 @@ class Client:
                 if section != "info":
                     for key in self.config[section]:
                         print("   " + key + ":" + str(self.config[section][key]))
-                    aNewFacture =  Facture.Facture (section,self.name,str(self.config[section]["editionDate"]),str(self.config[section]["dueDate"]),self.config[section]["amount"])
-                   # aNewFacture = Facture.Facture(1,"Nom","2017-01-01","2017-01-01",10)
+                    aNewFacture =  Facture.Facture (section,self.name,\
+                                    str(self.config[section]["editionDate"]),\
+                                    str(self.config[section]["dueDate"]),\
+                                    self.config[section]["amount"],\
+                                    self.config[section]["paid"])
                     self.factureList.append(aNewFacture)
+        #    self.factureList= self.factureList.sort(key = lambda fac:fac.dueDate)
             self.lastFactureId=int(section)
             pp.printGreen("Done")
         except :
@@ -64,11 +68,14 @@ class Client:
                         "amount" : self.amount,
                         "period" : self.period
                         }
-        for facture in self.factureList:
+        factureListSort=sorted(self.factureList,key= lambda fac:fac.editionDate)
+        for facture in factureListSort:
             config[str(facture.numberId)]={
                 "editionDate" : facture.editionDate,
                 "dueDate" : facture.dueDate,
-                "amount" : facture.amount
+                "amount" : facture.amount,
+                "paid" : facture.isPaid
+
             }
         if dump:
             with open('./Config/'+self.name+".dat", 'w') as configfile:

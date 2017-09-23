@@ -2,9 +2,10 @@
 namecompagny = MyCompagny
 siretnumber = 123456
 name = Me mi
-adress = anywhere	
+adress = anywhere
 city = 123456 city
 
 [clientsDB]
-nomClient
+nom
+chiant = 
 

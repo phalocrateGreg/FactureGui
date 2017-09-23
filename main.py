@@ -49,6 +49,7 @@ def loadClientInfo(clientName):
 
 def saveBeforeDestroy():
     global configFile
+    global clientList
     try:
         os.remove("./Config/config.old")
     except:
@@ -61,6 +62,16 @@ def saveBeforeDestroy():
     with open('./Config/config.dat', 'w') as configfile:
         configFile.write(configfile)
     pp.printGreen("Config file save")
+
+    
+    for client in clientList:
+        print("Saving Client "+client)
+        clientList[client].toConfig(True)
+        #with open("./Config/"+client+".dat.bu","w") as clientFile:
+        #    clientFile.write(clientList[client].toString())
+    pp.printGreen("Clients file save")
+
+
     toplevel.destroy()
 
 
@@ -107,7 +118,7 @@ root.title("Mine")
 
 toplevel = root.winfo_toplevel()
 toplevel.protocol("WM_DELETE_WINDOW", saveBeforeDestroy)
-toplevel.wm_state('zoomed')
+#toplevel.wm_state('zoomed')
 
 #print ("maxX="+str(root.winfo_screenwidth())+" "+str(root.winfo_screenheight()))
 
@@ -139,7 +150,8 @@ try :
 
 
 
-    myScreen = ClientSCreen(root, configFile, clientList)
+    #myScreen = ClientSCreen(root, configFile, clientList)
+    myScreen = CalendarScreen(root,configFile,clientList)
     myScreen.drawScreen()
     root.mainloop()
 
