@@ -66,11 +66,8 @@ def saveBeforeDestroy():
     
     for client in clientList:
         print("Saving Client "+client)
-        clientList[client].toConfig(True)
-        #with open("./Config/"+client+".dat.bu","w") as clientFile:
-        #    clientFile.write(clientList[client].toString())
+        clientList[client].toConfig(True)        
     pp.printGreen("Clients file save")
-
 
     toplevel.destroy()
 
